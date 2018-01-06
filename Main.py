@@ -1,5 +1,5 @@
 import pandas as pd
 
-df = pd.read_csv('pandas_dataframe_importing_csv/example.csv')
+df = pd.read_csv('hotels_data.csv')
 
 print(df)
