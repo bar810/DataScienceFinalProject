@@ -1,24 +1,58 @@
-
+import pandas as pd
 import scipy
 from pandas import DataFrame
 from sklearn import tree
+from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn import datasets
+from sklearn import tree
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 
-# df = DataFrame
-# features = list(df.columns[:4])
+#LOAD THE DATA FRAME
+df = pd.read_csv('ortal.csv')
 
-##tree
+#GET ONLY THE FEATURES I NEED
+features = list(df.columns[:5])
 
-# y = df["Target"]
-# X = df[features]
-# dt = DecisionTreeClassifier(min_samples_split=20, random_state=99)
-# dt.fit(X, y)
+# DROP THE ROWS WITH MISSING VALUES
+df = df.dropna()
 
-##naive bayes
+# DECISION TREE CLASSIFIER
+X = df[features]
+y = df["Discount Code"]
 
-iris = datasets.load_iris()
-gnb = GaussianNB()
-y_pred = gnb.fit(iris.data, iris.target).predict(iris.data)
-print("Number of mislabeled points out of a total %d points : %d" % (iris.data.shape[0],(iris.target != y_pred).sum()))
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+model = tree.DecisionTreeClassifier()
+
+print(model)
+
+# FIT OUR MODEL USING OUR TRAINING DATA
+model.fit(X_train, y_train)
+
+y_predict = model.predict(X_test)
+
+accuracy_score(y_test, y_predict)
+
+pd.DataFrame(
+    confusion_matrix(y_test, y_predict),
+    columns=['Predicted Not Survival', 'Predicted Survival'],
+    index=['True Not Survival', 'True Survival']
+)
+
+
+
+
+
+
+
+
+
+
+#
+# ##naive bayes
+#
+# iris = tree.load_iris()
+# gnb = GaussianNB()
+# y_pred = gnb.fit(iris.data, iris.target).predict(iris.data)
+# print("Number of mislabeled points out of a total %d points : %d" % (iris.data.shape[0],(iris.target != y_pred).sum()))

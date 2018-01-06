@@ -10,7 +10,6 @@ del df['DayDiff1']
 del df['DayDiff2']
 
 # ADD COLUMNS WEEKDAY- FIND THE SPECIFIC DAY BY THE CHECKIN DATE
-df = df.reset_index()
 df['WeekDay'] = pd.to_datetime(df['Checkin Date']).dt.weekday_name
 
 #ADD COLUMNS DISCOUNTDIFF - THE DIFFRENT BETWEEN ORIGINAL PRICE TO DISCOUNT PRICE
@@ -20,4 +19,3 @@ df['DiscountDiff']= pd.to_numeric(df['Original Price'])-pd.to_numeric(df['Discou
 df['DiscountPerc']=(pd.to_numeric(df['DiscountDiff'])/pd.to_numeric(df['Original Price']))*100
 
 df.to_csv('Hotels_data_Changed.csv')
-f
