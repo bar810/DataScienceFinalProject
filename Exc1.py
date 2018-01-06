@@ -20,3 +20,4 @@ df['DiscountDiff']= pd.to_numeric(df['Original Price'])-pd.to_numeric(df['Discou
 df['DiscountPerc']=(pd.to_numeric(df['DiscountDiff'])/pd.to_numeric(df['Original Price']))*100
 
 df.to_csv('Hotels_data_Changed.csv')
+f
