@@ -1,37 +1,38 @@
 import pandas as pd
-import csv
-import operator
+import pandasql as pdsql
 
-df = pd.read_csv('Hotels_data_Changed.csv')
+pysql = lambda q: pdsql.sqldf(q, globals())
 
+colnames = ['SnapshotID', 'SnapshotDate', 'CheckinDate', 'Days', 'OriginalPrice', 'DiscountPrice', 'DiscountCode', 'AvailableRooms', 'HotelName', 'HotelStars', 'DayDiff', 'WeekDay', 'DiscountDiff', 'DiscountPerc']
+df = pd.read_csv('Hotels_data_Changed.csv', header=None)
+print(df)
 
-def main():
+# query = 'select *' \
+#          'from df'
 
-    keep_col = ['Snapshot Date', 'Checkin Date', 'Hotel Name', 'DayDiff', 'WeekDay', 'Discount Code', 'DiscountDiff']
-    new_f = df[keep_col].head(10)
-    print(new_f)
+#dfX = pysql(query)
 
-    print("---------------------------------------------------------------")
+print(dfX)
 
-    new_f.to_csv("Classification.csv")
-    classi = pd.read_csv('Classification.csv')
-    print(classi)
+df2 = df[['SnapshotDate', 'CheckinDate','HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']]
+keep_col = ['SnapshotDate', 'CheckinDate', 'DiscountCode', 'HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']
+new_f = df[keep_col]
+new_f.to_csv("Classification.csv")
+Classification = pd.read_csv('Classification.csv', header=None, names=colnames).head(5)
+#print(Classification)
 
+df3 = Classification[['SnapshotDate', 'CheckinDate', 'DiscountCode', 'HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']]
+print('-----------------------------------print df3---------------------------------------')
+print(df3)
+print('-----------------------------------print df3---------------------------------------')
 
-
-    print("---------------------------------------------------------------")
-
-    columns = ['Snapshot Date', 'Checkin Date', 'Hotel Name', 'DayDiff', 'WeekDay', 'Discount Code']
-    new_f = new_f.groupby(columns)
-
-    print("---------------------------------------------------------------")
-
-    sort = sorted(new_f,key=operator.itemgetter(6))
-    print(sort)
-
-    new_f.to_csv("new.csv")
-    a = pd.read_csv('new.csv')
-    print(a)
+query = 'select SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, WeekDay, max(DiscountDiff) from df3 group by SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, WeekDay'
 
 
-main()
+df4 = pysql(query)
+print('-----------------------------------print df4---------------------------------------')
+print(df4)
+print('-----------------------------------print df4---------------------------------------')
+df4.to_csv("new.csv")
+# a = pd.read_csv('new.csv')
+# print(a)

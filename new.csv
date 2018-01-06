@@ -1,11 +1,6 @@
-,Snapshot Date,Checkin Date,Hotel Name,DayDiff,WeekDay,Discount Code,DiscountDiff
-0,7/17/2015 0:00,8/12/2015 0:00,Best Western Plus Seaport Inn Downtown,26,Wednesday,1,138
-1,7/17/2015 0:00,8/19/2015 0:00,Best Western Plus Seaport Inn Downtown,33,Wednesday,1,131
-2,7/17/2015 0:00,8/13/2015 0:00,The Peninsula New York,27,Thursday,1,130
-3,7/17/2015 0:00,7/26/2015 0:00,Eventi Hotel a Kimpton Hotel,9,Sunday,1,72
-4,7/17/2015 0:00,8/12/2015 0:00,Eventi Hotel a Kimpton Hotel,26,Wednesday,1,67
-5,7/17/2015 0:00,8/7/2015 0:00,Grand Hyatt New York,21,Friday,1,91
-6,7/17/2015 0:00,8/9/2015 0:00,Grand Hyatt New York,23,Sunday,1,91
-7,7/17/2015 0:00,8/12/2015 0:00,Grand Hyatt New York,26,Wednesday,1,73
-8,7/17/2015 0:00,8/13/2015 0:00,Grand Hyatt New York,27,Thursday,1,55
-9,7/17/2015 0:00,7/22/2015 0:00,Hilton New York Fashion District,5,Wednesday,1,200
+,SnapshotDate,CheckinDate,DiscountCode,HotelName,DayDiff,WeekDay,max(DiscountDiff)
+0,7/17/2015 0:00,Best Western Plus Seaport Inn Downtown,5,,1040,,11.714770797962649
+1,7/17/2015 0:00,Best Western Plus Seaport Inn Downtown,5,,982,,11.769991015274034
+2,7/17/2015 0:00,The Peninsula New York,5,,4240,,2.9748283752860414
+3,Snapshot Date,Hotel Name,Days,,Discount Price,,DiscountPerc
+4,SnapshotDate,WeekDay,DiscountCode,,DayDiff,,HotelName
