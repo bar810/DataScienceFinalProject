@@ -1,24 +1,99 @@
-
+import pandas as pd
 import scipy
 from pandas import DataFrame
-from sklearn import tree
+from sklearn import tree, preprocessing
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn import datasets
+from sklearn import tree
+from sklearn.metrics import accuracy_score
+import numpy as np
+from sklearn.metrics import confusion_matrix
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import confusion_matrix
+from sklearn.naive_bayes import BernoulliNB
 
-# df = DataFrame
-# features = list(df.columns[:4])
+# LOAD THE DATA FRAME
+df = pd.read_csv('Classification.csv')
+df=df.head(10000) # TODO  delete this
 
-##tree
+# GET ONLY THE FEATURES I NEED
+features = list(df.columns[1:6])  # TODO should be change
+# DROP THE ROWS WITH MISSING VALUES
+df = df.dropna()
 
-# y = df["Target"]
-# X = df[features]
-# dt = DecisionTreeClassifier(min_samples_split=20, random_state=99)
-# dt.fit(X, y)
+# INSERT THE VALUES INTO VARIABLES
+X = df[features]
+y = df["Discount Code"]
 
-##naive bayes
+# CONVERT THE FEATUERS TO NUMERIC: to translte back: le.transform(THE FITCHER NAME)
+translate1 = lambda row: wde.transform([row])[0]
+wde = preprocessing.LabelEncoder()
+wde.fit(X['WeekDay'])
 
-iris = datasets.load_iris()
-gnb = GaussianNB()
-y_pred = gnb.fit(iris.data, iris.target).predict(iris.data)
-print("Number of mislabeled points out of a total %d points : %d" % (iris.data.shape[0],(iris.target != y_pred).sum()))
+translate2 = lambda row: hne.transform([row])[0]
+hne = preprocessing.LabelEncoder()
+hne.fit(X['Hotel Name'])
+
+translate3 = lambda row: cde.transform([row])[0]
+cde = preprocessing.LabelEncoder()
+cde.fit(X['Checkin Date'])
+
+translate4 = lambda row: sde.transform([row])[0]
+sde = preprocessing.LabelEncoder()
+sde.fit(X['Snapshot Date'])
+
+X['WeekDay'] = X['WeekDay'].apply(translate1)
+X['Hotel Name'] = X['Hotel Name'].apply(translate2)
+X['Checkin Date'] = X['Checkin Date'].apply(translate3)
+X['Snapshot Date'] = X['Snapshot Date'].apply(translate4)
+
+# DECISION TREE CLASSIFIER
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+model = tree.DecisionTreeClassifier()
+model.fit(X_train, y_train)
+
+# TEST THE ALGORITHEM AND SHOW STATISTICS
+y_predict = model.predict(X_test)
+# accuracy
+accuracy=accuracy_score(y_test, y_predict)
+print("accuracy is: %s" %(accuracy))
+#CONFUSION MATRIX
+matrix=pd.DataFrame(
+    confusion_matrix(y_test, y_predict),
+    columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
+    index=['True 1', 'True 2','True 3','True 4']
+)
+print("confusion_matrix:")
+print(matrix)
+# FN
+
+# FP
+
+# ROC
+
+# RECALL
+
+# PRECISION
+
+
+
+
+
+
+
+
+# NAIVE BAYES CLASSIFIER
+# print(X)
+# print(y)
+
+# clf = GaussianNB()
+# print(clf.fit(X, y))
+# print(clf.predict([[10,46,274,21,4]]))
+
+# dlf = BernoulliNB()
+# dlf.fit(X, y)
+# BernoulliNB(alpha=1.0, binarize=0.0, fit_prior=True)
+# print(dlf.predict([[0,29,253,10,1]]))
