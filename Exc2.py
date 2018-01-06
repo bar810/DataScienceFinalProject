@@ -17,6 +17,8 @@ def main():
     classi = pd.read_csv('Classification.csv')
     print(classi)
 
+
+
     print("---------------------------------------------------------------")
 
     columns = ['Snapshot Date', 'Checkin Date', 'Hotel Name', 'DayDiff', 'WeekDay', 'Discount Code']
