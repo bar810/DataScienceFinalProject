@@ -8,6 +8,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_auc_score
+import matplotlib.pyplot as plt
+
+from sklearn.metrics import roc_curve, auc
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction import DictVectorizer
@@ -17,10 +21,10 @@ from sklearn.naive_bayes import BernoulliNB
 
 # LOAD THE DATA FRAME
 df = pd.read_csv('Classification.csv')
-df=df.head(10000) # TODO  delete this
+df=df.head(1000) # TODO  delete this
 
 # GET ONLY THE FEATURES I NEED
-features = list(df.columns[1:6])  # TODO should be change
+features = list(df.columns[1:6])  # TODO should be changed by ortal final csv
 # DROP THE ROWS WITH MISSING VALUES
 df = df.dropna()
 
@@ -57,30 +61,40 @@ model.fit(X_train, y_train)
 
 # TEST THE ALGORITHEM AND SHOW STATISTICS
 y_predict = model.predict(X_test)
-# accuracy
-accuracy=accuracy_score(y_test, y_predict)
-print("accuracy is: %s" %(accuracy))
+
 #CONFUSION MATRIX
 matrix=pd.DataFrame(
     confusion_matrix(y_test, y_predict),
     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
     index=['True 1', 'True 2','True 3','True 4']
 )
+print("-------------------------STATISTICS-------------------------")
 print("confusion_matrix:")
 print(matrix)
-# FN
+print("------------------------------------------------------------")
+# accuracy
+accuracy=accuracy_score(y_test, y_predict)
+print("accuracy is: %s" %(accuracy))
+print("------------------------------------------------------------")
+# TP
+tp = np.diag(matrix)
+print("TP is: %s" %(tp))
+print("------------------------------------------------------------")
+# # FP
+fp=matrix.sum(axis=0)-np.diag(matrix)
+print("FP:")
+print(fp)
+print("------------------------------------------------------------")
+# # FN
+fn = matrix.sum(axis=1) - np.diag(matrix)
+print("FN:")
+print(fn)
+print("------------------------------------------------------------")
+# # ROC
+print("ROC:")
 
-# FP
 
-# ROC
-
-# RECALL
-
-# PRECISION
-
-
-
-
+print("------------------------------------------------------------")
 
 
 
