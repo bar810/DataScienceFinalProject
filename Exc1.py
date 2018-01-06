@@ -2,6 +2,7 @@ import pandas as pd
 
 # RELOAD THE ORIGINAL CSV
 df = pd.read_csv('hotels_data.csv')
+
 # ADD COLUMNS DAY DIFF - THE DAYS BETWEEN SNAPSHOT DATE TO CHECKIN DATE
 df['DayDiff1'] = pd.to_datetime(df['Checkin Date'])
 df['DayDiff2'] = pd.to_datetime(df['Snapshot Date'])
@@ -18,4 +19,4 @@ df['DiscountDiff']= pd.to_numeric(df['Original Price'])-pd.to_numeric(df['Discou
 #ADD COLUMNS DISCOUNTPERC - THE PERCENT OF THE DISCOUNT
 df['DiscountPerc']=(pd.to_numeric(df['DiscountDiff'])/pd.to_numeric(df['Original Price']))*100
 
-df.to_csv('Hotels_data_Changed.csv')
+df.to_csv('Hotels_data_Changed.csv',index=False)

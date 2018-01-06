@@ -8,12 +8,14 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.feature_extraction import DictVectorizer
+
 
 #LOAD THE DATA FRAME
-df = pd.read_csv('ortal.csv')
+df = pd.read_csv('hotels_data_Changed.csv')
 
 #GET ONLY THE FEATURES I NEED
-features = list(df.columns[:5])
+features = list(df.columns[:3])
 
 # DROP THE ROWS WITH MISSING VALUES
 df = df.dropna()
@@ -22,25 +24,35 @@ df = df.dropna()
 X = df[features]
 y = df["Discount Code"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-model = tree.DecisionTreeClassifier()
-
-print(model)
-
-# FIT OUR MODEL USING OUR TRAINING DATA
-model.fit(X_train, y_train)
-
-y_predict = model.predict(X_test)
-
-accuracy_score(y_test, y_predict)
-
-pd.DataFrame(
-    confusion_matrix(y_test, y_predict),
-    columns=['Predicted Not Survival', 'Predicted Survival'],
-    index=['True Not Survival', 'True Survival']
-)
+print(X)
 
 
+
+#
+# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+# model = tree.DecisionTreeClassifier()
+#
+# print(model)
+#
+#
+# # FIT OUR MODEL USING OUR TRAINING DATA
+# model.fit(X_train, y_train)
+#
+#
+
+
+
+# y_predict = model.predict(X_test)
+#
+# accuracy_score(y_test, y_predict)
+#
+# pd.DataFrame(
+#     confusion_matrix(y_test, y_predict),
+#     columns=['Predicted Not Survival', 'Predicted Survival'],
+#     index=['True Not Survival', 'True Survival']
+# )
+#
+#
 
 
 
