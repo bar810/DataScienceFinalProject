@@ -5,20 +5,20 @@ pysql = lambda q: pdsql.sqldf(q, globals())
 
 colnames = ['SnapshotID', 'SnapshotDate', 'CheckinDate', 'Days', 'OriginalPrice', 'DiscountPrice', 'DiscountCode', 'AvailableRooms', 'HotelName', 'HotelStars', 'DayDiff', 'WeekDay', 'DiscountDiff', 'DiscountPerc']
 df = pd.read_csv('Hotels_data_Changed.csv', header=None)
-print(df)
+#sprint(df)
 
-# query = 'select *' \
-#          'from df'
+#  query = 'select *' \
+#           'from df'
+#
+# dfX = pysql(query)
+#
+# print(dfX)
 
-#dfX = pysql(query)
-
-print(dfX)
-
-df2 = df[['SnapshotDate', 'CheckinDate','HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']]
+df2 = df[['SnapshotDate', 'CheckinDate','DiscountCode','HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']]
 keep_col = ['SnapshotDate', 'CheckinDate', 'DiscountCode', 'HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']
 new_f = df[keep_col]
 new_f.to_csv("Classification.csv")
-Classification = pd.read_csv('Classification.csv', header=None, names=colnames).head(5)
+Classification = pd.read_csv('Classification.csv', header=None, names=colnames)#.head(5)
 #print(Classification)
 
 df3 = Classification[['SnapshotDate', 'CheckinDate', 'DiscountCode', 'HotelName', 'DayDiff', 'WeekDay', 'DiscountDiff']]

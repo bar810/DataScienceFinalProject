@@ -1,6 +1,0 @@
-,SnapshotDate,CheckinDate,DiscountCode,HotelName,DayDiff,WeekDay,max(DiscountDiff)
-0,7/17/2015 0:00,Best Western Plus Seaport Inn Downtown,5,,1040,,11.714770797962649
-1,7/17/2015 0:00,Best Western Plus Seaport Inn Downtown,5,,982,,11.769991015274034
-2,7/17/2015 0:00,The Peninsula New York,5,,4240,,2.9748283752860414
-3,Snapshot Date,Hotel Name,Days,,Discount Price,,DiscountPerc
-4,SnapshotDate,WeekDay,DiscountCode,,DayDiff,,HotelName
