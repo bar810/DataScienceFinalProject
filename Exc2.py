@@ -3,12 +3,15 @@ import pandasql as pdsql
 import pandas as pd
 from sklearn import tree, preprocessing
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn import tree
 from sklearn.metrics import accuracy_score
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.naive_bayes import BernoulliNB
+import scikitplot as skplt
+import matplotlib.pyplot as plt
+
 pysql = lambda q: pdsql.sqldf(q, globals())
 
 # THIS PART TAKE THE WHOLE TABLE AND DROP THE UNNECCERY COLUMNS
@@ -26,7 +29,7 @@ query = 'select SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, Wee
 df = pysql(query)
 
 # PART 2.2
-df=df.head(100)
+df=df.head(10000)
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
 
@@ -59,20 +62,66 @@ df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
 X = df[features]
 y = df["DiscountCode"]
 
-# DECISION TREE CLASSIFIER
-print("------------------------DECISION TREE-----------------------")
-print()
+# # DECISION TREE CLASSIFIER
+# print("------------------------DECISION TREE-----------------------")
+# print()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+# model = tree.DecisionTreeClassifier()
+# model.fit(X_train, y_train)
+#
+# # TEST THE ALGORITHEM AND SHOW STATISTICS
+# y_predict = model.predict(X_test)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-model = tree.DecisionTreeClassifier()
-model.fit(X_train, y_train)
+# #CONFUSION MATRIX
+# matrix=pd.DataFrame(
+#     confusion_matrix(y_test, y_predict),
+#     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
+#     index=['True 1', 'True 2','True 3','True 4']
+# )
+# print("-------------------------STATISTICS-------------------------")
+# print("confusion_matrix:")
+# print(matrix)
+# print("------------------------------------------------------------")
+# # accuracy
+# accuracy=accuracy_score(y_test, y_predict)
+# print("accuracy is: %s" %(accuracy))
+# print("------------------------------------------------------------")
+# # TP
+# tp = np.diag(matrix)
+# print("TP is: %s" %(tp))
+# print("------------------------------------------------------------")
+# # FP
+# fp=matrix.sum(axis=0)-np.diag(matrix)
+# print("FP:")
+# print(fp)
+# print("------------------------------------------------------------")
+# # FN
+# fn = matrix.sum(axis=1) - np.diag(matrix)
+# print("FN:")
+# print(fn)
+# print("------------------------------------------------------------")
+# # ROC
+# print("ROC:")
+# # This is the ROC curve
+# y_predict2 = model.predict_proba(X_test)
+# skplt.metrics.plot_roc_curve(y_test, y_predict2)
+# plt.show()
+# print("see diagram")
+# print("------------------------------------------------------------")
+# print()
 
-# TEST THE ALGORITHEM AND SHOW STATISTICS
-y_predict = model.predict(X_test)
+# #TODO fix that. its look strange
+# NAIVE BAYES CLASSIFIER
+print("-------------------------NAIVE BAYES------------------------")
+clf = GaussianNB()
+X1_train, X1_test, y1_train, y1_test = train_test_split(X, y, random_state=1)
+clf.fit(X1_train, y1_train)
+predicted = clf.predict(X1_test) #this i added
+predicted_probas = clf.predict_proba(X1_test)
 
 #CONFUSION MATRIX
 matrix=pd.DataFrame(
-    confusion_matrix(y_test, y_predict),
+    confusion_matrix(y1_test, predicted),
     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
     index=['True 1', 'True 2','True 3','True 4']
 )
@@ -81,7 +130,7 @@ print("confusion_matrix:")
 print(matrix)
 print("------------------------------------------------------------")
 # accuracy
-accuracy=accuracy_score(y_test, y_predict)
+accuracy=accuracy_score(y1_test, predicted)
 print("accuracy is: %s" %(accuracy))
 print("------------------------------------------------------------")
 # TP
@@ -100,18 +149,20 @@ print(fn)
 print("------------------------------------------------------------")
 # ROC
 print("ROC:")
-#TODO add this
+# This is the ROC curve
+y_predict2 = clf.predict_proba(X1_test)
+skplt.metrics.plot_roc_curve(y1_test, predicted_probas)
+plt.show()
+print("see diagram")
 print("------------------------------------------------------------")
 print()
 
-#TODO fix that. its look strange
-# NAIVE BAYES CLASSIFIER
-print("-------------------------NAIVE BAYES------------------------")
-clf = GaussianNB()
-print(clf.fit(X, y))
-print(clf.predict([[10,46,274,21,4]]))
 
-dlf = BernoulliNB()
-dlf.fit(X, y)
-BernoulliNB(alpha=1.0, binarize=0.0, fit_prior=True)
-print(dlf.predict([[0,29,253,10,1]]))
+
+
+
+
+
+
+
+
