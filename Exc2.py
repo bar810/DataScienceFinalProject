@@ -29,7 +29,7 @@ query = 'select SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, Wee
 df = pysql(query)
 
 # PART 2.2
-df=df.head(10000)
+# df=df.head(10000)
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
 
@@ -113,18 +113,18 @@ y = df["DiscountCode"]
 # #TODO fix that. its look strange
 # NAIVE BAYES CLASSIFIER
 print("-------------------------NAIVE BAYES------------------------")
-clf = GaussianNB()
+clf =MultinomialNB(class_prior=[26,31,26,17],fit_prior=False)
 X1_train, X1_test, y1_train, y1_test = train_test_split(X, y, random_state=1)
 clf.fit(X1_train, y1_train)
 predicted = clf.predict(X1_test) #this i added
 predicted_probas = clf.predict_proba(X1_test)
 
-#CONFUSION MATRIX
 matrix=pd.DataFrame(
     confusion_matrix(y1_test, predicted),
     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
     index=['True 1', 'True 2','True 3','True 4']
 )
+
 print("-------------------------STATISTICS-------------------------")
 print("confusion_matrix:")
 print(matrix)
@@ -156,8 +156,6 @@ plt.show()
 print("see diagram")
 print("------------------------------------------------------------")
 print()
-
-
 
 
 

@@ -2,6 +2,8 @@ import pandas as pd
 import pandasql as pdsql
 from sklearn import preprocessing
 import numpy as np
+from matplotlib import pyplot as plt
+from dateutil import parser
 
 
 def df_crossjoin(df1, df2, **kwargs):
@@ -17,7 +19,6 @@ colnames = ['SnapshotID','SnapshotDate','CheckinDate','Days','OriginalPrice','Di
             'HotelName','HotelStars']
 df = pd.read_csv('hotels_data.csv', names=colnames, header=None)
 pysql = lambda q: pdsql.sqldf(q, globals())
-
 print("-------------------QUEREY 1-------------------")
 #150 hotels most records
 q1 = 'select HotelName, count(HotelName) ' \
@@ -91,4 +92,35 @@ scaled_df.drop(scaled_df.index[0], inplace=True)
 scaled_df.to_csv('pivot_normalize.csv')
 
 print("-------------------CLUSTERING-------------------")
-#TODO add this part
+minDate = parser.parse('2015-10-02')
+maxDate = parser.parse('2016-01-01')
+print(minDate)
+
+
+# #TODO add this part
+clslist=[]
+for col in scaled_df.columns.values:
+    for row in scaled_df.itertuples():
+        i=scaled_df.columns.get_loc(col)
+        if i>1 and row[scaled_df.columns.get_loc(col)] > 0 :#and row[scaled_df.columns.get_loc(col)] < 10:
+            currentDate = parser.parse(str(col).split('_')[0])
+            dayDiff = (currentDate - minDate).days
+            clslist.append([dayDiff, format(row[scaled_df.columns.get_loc(col)], '.2f')])
+
+
+# colors = [int(i % 3) for i in scaled_df['DiscountCode']]
+#pylab.scatter(xy[0], xy[1], c=colors)
+
+clslist = np.asarray(clslist).sort()
+print(clslist)
+
+
+N = 8207
+area = np.pi * (15 * np.random.rand(N))**2 # 0 to 15 point radii
+#print(clsList[:,1])
+colors = np.random.rand(N)
+plt.yticks(rotation=70)
+plt.xticks(np.arange(0, 59, 1), rotation='vertical')
+plt.scatter(clslist[:,0], clslist[:,1],alpha=0.5, c=colors)
+plt.show()
+
