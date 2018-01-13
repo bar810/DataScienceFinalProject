@@ -1,6 +1,7 @@
 import pandas as pd
 import pandasql as pdsql
 from sklearn import preprocessing
+import numpy as np
 
 
 def df_crossjoin(df1, df2, **kwargs):
@@ -41,7 +42,7 @@ df2 = pysql(q2)
 # DROP THE UNRELEVANT DATA FROM THE MAIN DATA FRAME
 mdfq= 'select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) '\
         'from df '\
-        'where HotelName in(select HotelName from df1) '\
+        'where HotelName in (select HotelName from df1) '\
         'and CheckinDate in (select CheckinDate from df2) '\
         'group by HotelName, CheckinDate, DiscountCode'
 
@@ -65,22 +66,30 @@ df33['datePlusCode']=df32['CheckinDate']+'_'+df32['DiscountCode']
 print("-------------------QUEREY 3.4-------------------")
 q34='select a.HotelName, a.DiscountPrice, b.datePlusCode '\
     'from ndf as a '\
-    'left join df33 as b '\
+    'inner join df33 as b '\
     'on a.DiscountCode=b.DiscountCode and a.CheckinDate=b.CheckinDate '
 df34 = pysql(q34)
 # print(df34)
 
-# print("-------------------QUEREY 4-------------------")
+print("-------------------QUEREY 4-------------------")
 df35=df34.pivot(index='HotelName', columns='datePlusCode', values='DiscountPrice')
-df35.fillna(value=-1,inplace=True)
-# print(df35)
+df35.fillna(value=-1,inplace=True) # TODO replace it to the step before.
+df35.to_csv('pivot.csv')
+dfx = pd.read_csv('pivot.csv')
+# print(dfx)
+print("-------------------NORMALIZE-------------------")
+hotelNameList=dfx['HotelName']
+columns_names=dfx.columns.values
+dfn= dfx.drop('HotelName', 1)
+scalar=preprocessing.MinMaxScaler(copy = True, feature_range=(0, 100))
+scaled_df=scalar.fit_transform(dfn)
+scaled_df=pd.DataFrame(scaled_df)
+scaled_df.insert(0, 'HotelName', hotelNameList)
+scaled_df.to_csv('pivot_normalize.csv')
+scaled_df = pd.read_csv('pivot_normalize.csv',names=columns_names)
+scaled_df.to_csv('pivot_normalize.csv')
+scaled_df.drop(scaled_df.index[0], inplace=True)
+scaled_df.to_csv('pivot_normalize.csv')
 
-# print("-------------------NORMALIZE-------------------")
-scaler = preprocessing.MinMaxScaler()
-scaled_df = scaler.fit_transform(df35)
-scaled_df = pd.DataFrame(scaled_df) #TODO cancel header normalize
-scaled_df=scaled_df*100
-# print(scaled_df)
-
-# print("-------------------CLUSTERING-------------------")
+print("-------------------CLUSTERING-------------------")
 #TODO add this part
