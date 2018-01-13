@@ -87,7 +87,6 @@ scaled_df=pd.DataFrame(scaled_df)
 scaled_df.insert(0, 'HotelName', hotelNameList)
 scaled_df.to_csv('pivot_normalize.csv')
 scaled_df = pd.read_csv('pivot_normalize.csv',names=columns_names)
-scaled_df.to_csv('pivot_normalize.csv')
 scaled_df.drop(scaled_df.index[0], inplace=True)
 scaled_df.to_csv('pivot_normalize.csv')
 
