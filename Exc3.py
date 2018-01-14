@@ -19,6 +19,7 @@ colnames = ['SnapshotID','SnapshotDate','CheckinDate','Days','OriginalPrice','Di
             'HotelName','HotelStars']
 df = pd.read_csv('hotels_data.csv', names=colnames, header=None)
 pysql = lambda q: pdsql.sqldf(q, globals())
+# df=df.head(10000)
 print("-------------------QUEREY 1-------------------")
 #150 hotels most records
 q1 = 'select HotelName, count(HotelName) ' \
@@ -94,7 +95,7 @@ scaled_df.to_csv('pivot_normalize.csv')
 print("-------------------CLUSTERING-------------------")
 minDate = parser.parse('2015-10-02')
 maxDate = parser.parse('2016-01-01')
-print(minDate)
+# print(minDate)
 
 
 # #TODO add this part
@@ -109,10 +110,8 @@ for col in scaled_df.columns.values:
 
 
 # colors = [int(i % 3) for i in scaled_df['DiscountCode']]
-#pylab.scatter(xy[0], xy[1], c=colors)
-
-clslist = np.asarray(clslist).sort()
-print(clslist)
+# pylab.scatter(xy[0], xy[1], c=colors)
+clslist = np.asarray(clslist)
 
 
 N = 8207

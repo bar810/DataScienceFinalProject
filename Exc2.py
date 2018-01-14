@@ -11,6 +11,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.naive_bayes import BernoulliNB
 import scikitplot as skplt
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
+
 
 pysql = lambda q: pdsql.sqldf(q, globals())
 
@@ -29,7 +31,7 @@ query = 'select SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, Wee
 df = pysql(query)
 
 # PART 2.2
-# df=df.head(10000)
+df=df.head(10000)
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
 
@@ -62,55 +64,55 @@ df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
 X = df[features]
 y = df["DiscountCode"]
 
-# # DECISION TREE CLASSIFIER
-# print("------------------------DECISION TREE-----------------------")
-# print()
-# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-# model = tree.DecisionTreeClassifier()
-# model.fit(X_train, y_train)
-#
-# # TEST THE ALGORITHEM AND SHOW STATISTICS
-# y_predict = model.predict(X_test)
+# DECISION TREE CLASSIFIER
+print("------------------------DECISION TREE-----------------------")
+print()
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+model = tree.DecisionTreeClassifier()
+model.fit(X_train, y_train)
 
-# #CONFUSION MATRIX
-# matrix=pd.DataFrame(
-#     confusion_matrix(y_test, y_predict),
-#     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
-#     index=['True 1', 'True 2','True 3','True 4']
-# )
-# print("-------------------------STATISTICS-------------------------")
-# print("confusion_matrix:")
-# print(matrix)
-# print("------------------------------------------------------------")
-# # accuracy
-# accuracy=accuracy_score(y_test, y_predict)
-# print("accuracy is: %s" %(accuracy))
-# print("------------------------------------------------------------")
-# # TP
-# tp = np.diag(matrix)
-# print("TP is: %s" %(tp))
-# print("------------------------------------------------------------")
-# # FP
-# fp=matrix.sum(axis=0)-np.diag(matrix)
-# print("FP:")
-# print(fp)
-# print("------------------------------------------------------------")
-# # FN
-# fn = matrix.sum(axis=1) - np.diag(matrix)
-# print("FN:")
-# print(fn)
-# print("------------------------------------------------------------")
-# # ROC
-# print("ROC:")
-# # This is the ROC curve
-# y_predict2 = model.predict_proba(X_test)
-# skplt.metrics.plot_roc_curve(y_test, y_predict2)
-# plt.show()
-# print("see diagram")
-# print("------------------------------------------------------------")
-# print()
+# TEST THE ALGORITHEM AND SHOW STATISTICS
+y_predict = model.predict(X_test)
 
-# #TODO fix that. its look strange
+#CONFUSION MATRIX
+matrix=pd.DataFrame(
+    confusion_matrix(y_test, y_predict),
+    columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
+    index=['True 1', 'True 2','True 3','True 4']
+)
+print("-------------------------STATISTICS-------------------------")
+print("confusion_matrix:")
+print(matrix)
+print("------------------------------------------------------------")
+# accuracy
+accuracy=accuracy_score(y_test, y_predict)
+print("accuracy is: %s" %(accuracy))
+print("------------------------------------------------------------")
+# TP
+tp = np.diag(matrix)
+print("TP is: %s" %(tp))
+print("------------------------------------------------------------")
+# FP
+fp=matrix.sum(axis=0)-np.diag(matrix)
+print("FP:")
+print(fp)
+print("------------------------------------------------------------")
+# FN
+fn = matrix.sum(axis=1) - np.diag(matrix)
+print("FN:")
+print(fn)
+print("------------------------------------------------------------")
+# ROC
+print("ROC:")
+# This is the ROC curve
+y_predict2 = model.predict_proba(X_test)
+skplt.metrics.plot_roc_curve(y_test, y_predict2)
+plt.show()
+print("see diagram")
+print("------------------------------------------------------------")
+print()
+
+#TODO fix that. its look strange
 # NAIVE BAYES CLASSIFIER
 print("-------------------------NAIVE BAYES------------------------")
 clf =MultinomialNB(class_prior=[26,31,26,17],fit_prior=False)
@@ -156,6 +158,60 @@ plt.show()
 print("see diagram")
 print("------------------------------------------------------------")
 print()
+
+
+print("-------------------------KNN------------------------")
+print()
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+knn = KNeighborsClassifier(n_neighbors=1)
+knn.fit(X_train, y_train)
+#
+# TEST THE ALGORITHEM AND SHOW STATISTICS
+y_predict = knn.predict(X_test)
+
+#CONFUSION MATRIX
+matrix=pd.DataFrame(
+    confusion_matrix(y_test, y_predict),
+    columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
+    index=['True 1', 'True 2','True 3','True 4']
+)
+print("-------------------------STATISTICS-------------------------")
+print("confusion_matrix:")
+print(matrix)
+print("------------------------------------------------------------")
+# accuracy
+accuracy=accuracy_score(y_test, y_predict)
+print("accuracy is: %s" %(accuracy))
+print("------------------------------------------------------------")
+# TP
+tp = np.diag(matrix)
+print("TP is: %s" %(tp))
+print("------------------------------------------------------------")
+# FP
+fp=matrix.sum(axis=0)-np.diag(matrix)
+print("FP:")
+print(fp)
+print("------------------------------------------------------------")
+# FN
+fn = matrix.sum(axis=1) - np.diag(matrix)
+print("FN:")
+print(fn)
+print("------------------------------------------------------------")
+# ROC
+print("ROC:")
+# This is the ROC curve
+y_predict2 = knn.predict_proba(X_test)
+skplt.metrics.plot_roc_curve(y_test, y_predict2)
+plt.show()
+print("see diagram")
+print("------------------------------------------------------------")
+print()
+
+
+
+
+
+
 
 
 
