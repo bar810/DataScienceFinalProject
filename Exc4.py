@@ -14,8 +14,6 @@ dfTemp2 = pysql('select name,code, min(price) from dfTemp group by name')
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
 
-
-
 dfTemp = spark.read.csv('test.csv', header=True)
 dfTemp.createOrReplaceTempView('dfTemp')
 
