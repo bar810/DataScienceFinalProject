@@ -20,7 +20,7 @@ colnames = ['SnapshotID','SnapshotDate','CheckinDate','Days','OriginalPrice','Di
             'HotelName','HotelStars']
 df = pd.read_csv('hotels_data.csv', names=colnames, header=None)
 pysql = lambda q: pdsql.sqldf(q, globals())
-# df=df.head(10000)
+df=df.head(10000)
 print("-------------------QUEREY 1-------------------")
 #150 hotels most records
 q1 = 'select HotelName, count(HotelName) ' \
@@ -93,42 +93,23 @@ scaled_df = pd.read_csv('pivot_normalize.csv',names=columns_names)
 scaled_df.drop(scaled_df.index[0], inplace=True)
 scaled_df.to_csv('pivot_normalize.csv')
 
-print("-------------------CLUSTERING-------------------")
+print("-------------------CLUSTERING AND DENDOGRAM-------------------")
 minDate = parser.parse('2015-10-02')
 maxDate = parser.parse('2016-01-01')
-# print(minDate)
-
-
-# #TODO add this part
 clslist=[]
 for col in scaled_df.columns.values:
     for row in scaled_df.itertuples():
         i=scaled_df.columns.get_loc(col)
-        if i>1 and row[scaled_df.columns.get_loc(col)] > 0 :#and row[scaled_df.columns.get_loc(col)] < 10:
+        if i>1 and row[scaled_df.columns.get_loc(col)] > 0 :
             currentDate = parser.parse(str(col).split('_')[0])
             dayDiff = (currentDate - minDate).days
             clslist.append([dayDiff, format(row[scaled_df.columns.get_loc(col)], '.2f')])
 
-
-# colors = [int(i % 3) for i in scaled_df['DiscountCode']]
-# pylab.scatter(xy[0], xy[1], c=colors)
 clslist = np.asarray(clslist)
-
-
-N = 8207
-area = np.pi * (15 * np.random.rand(N))**2 # 0 to 15 point radii
-#print(clsList[:,1])
-colors = np.random.rand(N)
-plt.yticks(rotation=70)
-plt.xticks(np.arange(0, 59, 1), rotation='vertical')
-plt.scatter(clslist[:,0], clslist[:,1],alpha=0.5, c=colors)
-# plt.show()
-
-#DENDOGRAM
 plt.figure(figsize=(25,10))
-plt.title("nn")
-plt.xlabel("jj")
-plt.ylabel("hh")
+plt.title("DENDOGRAM")
+plt.xlabel("DATES AND CODE")
+plt.ylabel("PRICES")
 z=linkage(clslist,'ward')
-dendrogram(z)
+dendrogram(z,leaf_rotation=90,leaf_font_size=8,)
 plt.show()

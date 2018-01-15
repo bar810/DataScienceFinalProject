@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pandasql as pdsql
-import pydotplus
 import scikitplot as skplt
 from sklearn import preprocessing
 from sklearn import tree
@@ -123,11 +122,11 @@ print("ROC:")
 # This is the ROC curve
 y_predict2 = model.predict_proba(X_test)
 skplt.metrics.plot_roc_curve(y_test, y_predict2)
-plt.show()
+# plt.show()
 print("see diagram")
 print("------------------------------------------------------------")
 print()
-# visualize_tree(model,features)
+visualize_tree(model,features)
 
 
 
