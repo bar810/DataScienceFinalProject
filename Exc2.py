@@ -6,11 +6,14 @@ import pydotplus
 import scikitplot as skplt
 from sklearn import preprocessing
 from sklearn import tree
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostRegressor
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import export_graphviz
 
 pysql = lambda q: pdsql.sqldf(q, globals())
