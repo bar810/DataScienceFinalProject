@@ -1,5 +1,6 @@
 import pandas as pd
 import pandasql as pdsql
+from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn import preprocessing
 import numpy as np
 from matplotlib import pyplot as plt
@@ -121,5 +122,13 @@ colors = np.random.rand(N)
 plt.yticks(rotation=70)
 plt.xticks(np.arange(0, 59, 1), rotation='vertical')
 plt.scatter(clslist[:,0], clslist[:,1],alpha=0.5, c=colors)
-plt.show()
+# plt.show()
 
+#DENDOGRAM
+plt.figure(figsize=(25,10))
+plt.title("nn")
+plt.xlabel("jj")
+plt.ylabel("hh")
+z=linkage(clslist,'ward')
+dendrogram(z)
+plt.show()
