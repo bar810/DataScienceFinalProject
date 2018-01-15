@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pandasql as pdsql
+import pydotplus
 import scikitplot as skplt
 from sklearn import preprocessing
 from sklearn import tree
@@ -11,21 +12,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import export_graphviz
-
-
-def visualize_tree(tree, feature_names):
-    from sklearn.tree import  export_graphviz
-    import subprocess
-    with open("tree.dot", 'w') as f:
-        export_graphviz(tree, out_file=f,
-                        feature_names=feature_names)
-
-    command = ["dot", "-Tpng", "tree.dot", "-o", "tree.png"]
-    try:
-        subprocess.check_call(command)
-    except:
-        exit("Could not run dot, ie graphviz, to "
-             "produce visualization")
 
 pysql = lambda q: pdsql.sqldf(q, globals())
 
@@ -44,7 +30,7 @@ query = 'select SnapshotDate, CheckinDate, DiscountCode, HotelName, DayDiff, Wee
 df = pysql(query)
 
 # PART 2.2
-df = df.head(10000)
+df = df.head(100)
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
 
@@ -126,19 +112,15 @@ skplt.metrics.plot_roc_curve(y_test, y_predict2)
 print("see diagram")
 print("------------------------------------------------------------")
 print()
-visualize_tree(model,features)
 
-
-
-
-
-
-
-
-
-
-
-
+# DRAW THE TREE
+dot_data = tree.export_graphviz(model,
+                                feature_names=features,
+                                out_file=None,
+                                filled=True,
+                                rounded=True)
+graph = pydotplus.graph_from_dot_data(dot_data)
+graph.write_png('tree.png')
 
 
 
