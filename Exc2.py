@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import nltk as nltk
 import numpy as np
 import pandas as pd
 import pandasql as pdsql
@@ -35,7 +36,7 @@ df = pysql(query)
 # PART 2.2
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
-
+df=df.head(1000)
 # DROP THE ROWS WITH MISSING VALUES
 df = df.dropna()
 
@@ -66,63 +67,63 @@ X = df[features]
 y = df["DiscountCode"]
 columns_names=X.columns.values
 
-# DECISION TREE CLASSIFIER
-print("------------------------DECISION TREE-----------------------")
-print()
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-model = tree.DecisionTreeClassifier()
-model.fit(X_train, y_train)
-
-# TEST THE ALGORITHEM AND SHOW STATISTICS
-y_predict = model.predict(X_test)
-
-# CONFUSION MATRIX
-matrix = pd.DataFrame(
-    confusion_matrix(y_test, y_predict),
-    columns=['Predicted 1', 'Predicted 2', 'Predicted 3', 'Predicted 4'],
-    index=['True 1', 'True 2', 'True 3', 'True 4']
-)
-
-print("-------------------------STATISTICS-------------------------")
-print("confusion_matrix:")
-print(matrix)
-print("------------------------------------------------------------")
-# accuracy
-accuracy = accuracy_score(y_test, y_predict)
-print("accuracy is: %s" % (accuracy))
-print("------------------------------------------------------------")
-# TP
-tp = np.diag(matrix)
-print("TP is: %s" % (tp))
-print("------------------------------------------------------------")
-# FP
-fp = matrix.sum(axis=0) - np.diag(matrix)
-print("FP:")
-print(fp)
-print("------------------------------------------------------------")
-# FN
-fn = matrix.sum(axis=1) - np.diag(matrix)
-print("FN:")
-print(fn)
-print("------------------------------------------------------------")
-# ROC
-print("ROC:")
-# This is the ROC curve
-y_predict2 = model.predict_proba(X_test)
-skplt.metrics.plot_roc_curve(y_test, y_predict2)
-plt.show()
-print("see diagram")
-print("------------------------------------------------------------")
-print()
-
-# # DRAW THE TREE
-# dot_data = tree.export_graphviz(model,
-#                                 feature_names=features,
-#                                 out_file=None,
-#                                 filled=True,
-#                                 rounded=True)
-# graph = pydotplus.graph_from_dot_data(dot_data)
-# graph.write_png('tree.png')
+# # DECISION TREE CLASSIFIER
+# print("------------------------DECISION TREE-----------------------")
+# print()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+# model = tree.DecisionTreeClassifier()
+# model.fit(X_train, y_train)
+#
+# # TEST THE ALGORITHEM AND SHOW STATISTICS
+# y_predict = model.predict(X_test)
+#
+# # CONFUSION MATRIX
+# matrix = pd.DataFrame(
+#     confusion_matrix(y_test, y_predict),
+#     columns=['Predicted 1', 'Predicted 2', 'Predicted 3', 'Predicted 4'],
+#     index=['True 1', 'True 2', 'True 3', 'True 4']
+# )
+#
+# print("-------------------------STATISTICS-------------------------")
+# print("confusion_matrix:")
+# print(matrix)
+# print("------------------------------------------------------------")
+# # accuracy
+# accuracy = accuracy_score(y_test, y_predict)
+# print("accuracy is: %s" % (accuracy))
+# print("------------------------------------------------------------")
+# # TP
+# tp = np.diag(matrix)
+# print("TP is: %s" % (tp))
+# print("------------------------------------------------------------")
+# # FP
+# fp = matrix.sum(axis=0) - np.diag(matrix)
+# print("FP:")
+# print(fp)
+# print("------------------------------------------------------------")
+# # FN
+# fn = matrix.sum(axis=1) - np.diag(matrix)
+# print("FN:")
+# print(fn)
+# print("------------------------------------------------------------")
+# # ROC
+# print("ROC:")
+# # This is the ROC curve
+# y_predict2 = model.predict_proba(X_test)
+# skplt.metrics.plot_roc_curve(y_test, y_predict2)
+# plt.show()
+# print("see diagram")
+# print("------------------------------------------------------------")
+# print()
+#
+# # # DRAW THE TREE
+# # dot_data = tree.export_graphviz(model,
+# #                                 feature_names=features,
+# #                                 out_file=None,
+# #                                 filled=True,
+# #                                 rounded=True)
+# # graph = pydotplus.graph_from_dot_data(dot_data)
+# # graph.write_png('tree.png')
 
 
 # NAIVE BAYES CLASSIFIER
@@ -139,80 +140,80 @@ matrix=pd.DataFrame(
     index=['True 1', 'True 2','True 3','True 4']
 )
 
-print("-------------------------STATISTICS-------------------------")
-print("confusion_matrix:")
-print(matrix)
-print("------------------------------------------------------------")
-# accuracy
-accuracy=accuracy_score(y1_test, predicted)
-print("accuracy is: %s" %(accuracy))
-print("------------------------------------------------------------")
-# TP
-tp = np.diag(matrix)
-print("TP is: %s" %(tp))
-print("------------------------------------------------------------")
-# FP
-fp=matrix.sum(axis=0)-np.diag(matrix)
-print("FP:")
-print(fp)
-print("------------------------------------------------------------")
-# FN
-fn = matrix.sum(axis=1) - np.diag(matrix)
-print("FN:")
-print(fn)
-print("------------------------------------------------------------")
-# ROC
-print("ROC:")
-# This is the ROC curve
-skplt.metrics.plot_roc_curve(y1_test, predicted_probas)
-plt.show()
-print("see diagram")
-print("------------------------------------------------------------")
-print()
+# print("-------------------------STATISTICS-------------------------")
+# print("confusion_matrix:")
+# print(matrix)
+# print("------------------------------------------------------------")
+# # accuracy
+# accuracy=accuracy_score(y1_test, predicted)
+# print("accuracy is: %s" %(accuracy))
+# print("------------------------------------------------------------")
+# # TP
+# tp = np.diag(matrix)
+# print("TP is: %s" %(tp))
+# print("------------------------------------------------------------")
+# # FP
+# fp=matrix.sum(axis=0)-np.diag(matrix)
+# print("FP:")
+# print(fp)
+# print("------------------------------------------------------------")
+# # FN
+# fn = matrix.sum(axis=1) - np.diag(matrix)
+# print("FN:")
+# print(fn)
+# print("------------------------------------------------------------")
+# # ROC
+# print("ROC:")
+# # This is the ROC curve
+# skplt.metrics.plot_roc_curve(y1_test, predicted_probas)
+# plt.show()
+# print("see diagram")
+# print("------------------------------------------------------------")
+# print()
 
-print("-------------------------KNN------------------------")
-print()
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-knn = KNeighborsClassifier(n_neighbors=1)
-knn.fit(X_train, y_train)
+# print("-------------------------KNN------------------------")
+# print()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+# knn = KNeighborsClassifier(n_neighbors=1)
+# knn.fit(X_train, y_train)
+# #
+# # TEST THE ALGORITHEM AND SHOW STATISTICS
+# y_predict = knn.predict(X_test)
 #
-# TEST THE ALGORITHEM AND SHOW STATISTICS
-y_predict = knn.predict(X_test)
-
-#CONFUSION MATRIX
-matrix=pd.DataFrame(
-    confusion_matrix(y_test, y_predict),
-    columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
-    index=['True 1', 'True 2','True 3','True 4']
-)
-print("-------------------------STATISTICS-------------------------")
-print("confusion_matrix:")
-print(matrix)
-print("------------------------------------------------------------")
-# accuracy
-accuracy=accuracy_score(y_test, y_predict)
-print("accuracy is: %s" %(accuracy))
-print("------------------------------------------------------------")
-# TP
-tp = np.diag(matrix)
-print("TP is: %s" %(tp))
-print("------------------------------------------------------------")
-# FP
-fp=matrix.sum(axis=0)-np.diag(matrix)
-print("FP:")
-print(fp)
-print("------------------------------------------------------------")
-# FN
-fn = matrix.sum(axis=1) - np.diag(matrix)
-print("FN:")
-print(fn)
-print("------------------------------------------------------------")
-# ROC
-print("ROC:")
-# This is the ROC curve
-y_predict2 = knn.predict_proba(X_test)
-skplt.metrics.plot_roc_curve(y_test, y_predict2)
-plt.show()
-print("see diagram")
-print("------------------------------------------------------------")
-print()
+# #CONFUSION MATRIX
+# matrix=pd.DataFrame(
+#     confusion_matrix(y_test, y_predict),
+#     columns=['Predicted 1', 'Predicted 2','Predicted 3','Predicted 4'],
+#     index=['True 1', 'True 2','True 3','True 4']
+# )
+# print("-------------------------STATISTICS-------------------------")
+# print("confusion_matrix:")
+# print(matrix)
+# print("------------------------------------------------------------")
+# # accuracy
+# accuracy=accuracy_score(y_test, y_predict)
+# print("accuracy is: %s" %(accuracy))
+# print("------------------------------------------------------------")
+# # TP
+# tp = np.diag(matrix)
+# print("TP is: %s" %(tp))
+# print("------------------------------------------------------------")
+# # FP
+# fp=matrix.sum(axis=0)-np.diag(matrix)
+# print("FP:")
+# print(fp)
+# print("------------------------------------------------------------")
+# # FN
+# fn = matrix.sum(axis=1) - np.diag(matrix)
+# print("FN:")
+# print(fn)
+# print("------------------------------------------------------------")
+# # ROC
+# print("ROC:")
+# # This is the ROC curve
+# y_predict2 = knn.predict_proba(X_test)
+# skplt.metrics.plot_roc_curve(y_test, y_predict2)
+# plt.show()
+# print("see diagram")
+# print("------------------------------------------------------------")
+# print()

@@ -1,5 +1,6 @@
 import pandas as pd
 import pandasql as pdsql
+from scipy.cluster import hierarchy
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn import preprocessing
 import numpy as np
@@ -18,9 +19,8 @@ def df_crossjoin(df1, df2, **kwargs):
 
 colnames = ['SnapshotID','SnapshotDate','CheckinDate','Days','OriginalPrice','DiscountPrice','DiscountCode','AvailableRooms',
             'HotelName','HotelStars']
-df = pd.read_csv('hotels_data.csv', names=colnames, header=None)
+df = pd.read_csv('hotels_data.csv', names=colnames, header=None,low_memory=False)
 pysql = lambda q: pdsql.sqldf(q, globals())
-df=df.head(10000)
 print("-------------------QUEREY 1-------------------")
 #150 hotels most records
 q1 = 'select HotelName, count(HotelName) ' \
@@ -93,23 +93,12 @@ scaled_df = pd.read_csv('pivot_normalize.csv',names=columns_names)
 scaled_df.drop(scaled_df.index[0], inplace=True)
 scaled_df.to_csv('pivot_normalize.csv')
 
-print("-------------------CLUSTERING AND DENDOGRAM-------------------")
-minDate = parser.parse('2015-10-02')
-maxDate = parser.parse('2016-01-01')
-clslist=[]
-for col in scaled_df.columns.values:
-    for row in scaled_df.itertuples():
-        i=scaled_df.columns.get_loc(col)
-        if i>1 and row[scaled_df.columns.get_loc(col)] > 0 :
-            currentDate = parser.parse(str(col).split('_')[0])
-            dayDiff = (currentDate - minDate).days
-            clslist.append([dayDiff, format(row[scaled_df.columns.get_loc(col)], '.2f')])
-
-clslist = np.asarray(clslist)
-plt.figure(figsize=(25,10))
-plt.title("DENDOGRAM")
-plt.xlabel("DATES AND CODE")
-plt.ylabel("PRICES")
-z=linkage(clslist,'ward')
-dendrogram(z,leaf_rotation=90,leaf_font_size=8,)
+# print("-------------------CLUSTERING AND DENDOGRAM-------------------")
+scaled_df = scaled_df.set_index('HotelName')
+print()
+del scaled_df.index.name
+# Calculate the distance between each sample
+Z = hierarchy.linkage(scaled_df, 'ward')
+# Plot with Custom leaves
+hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
 plt.show()
