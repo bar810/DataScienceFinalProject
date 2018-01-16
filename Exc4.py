@@ -1,7 +1,9 @@
 import pandas as pd
 from pyspark.ml.feature import StringIndexer, OneHotEncoder
+from pyspark.mllib.tree import DecisionTree
 from pyspark.sql import SparkSession
 import pandasql as pdsql
+from sklearn.cross_validation import train_test_split
 
 pysql = lambda q: pdsql.sqldf(q, globals())
 
@@ -53,13 +55,50 @@ df = spark.sql(query)
 
 df.show()
 
-#stringIndexer = StringIndexer(inputCol="SnapshotDate", outputCol="SnapshotDateIndex")
-#model = stringIndexer.fit(df)
-#print(model)
-#indexed = model.transform(df)
-#print(indexed)
-#encoder = OneHotEncoder(includeFirst=False, inputCol="SnapshotDateIndex", outputCol="SnapshotDateVec")
-#encoded = encoder.transform(indexed)
+snapshotIndexer = StringIndexer(inputCol="SnapshotDate", outputCol="SnapshotDateIndex")
+checkinDateIndexer = StringIndexer(inputCol="CheckinDate", outputCol="CheckinDateIndex")
+hotelNameIndexer = StringIndexer(inputCol="HotelName", outputCol="HotelNameIndex")
+weekDayIndexer = StringIndexer(inputCol="WeekDay", outputCol="WeekDayIndex")
+df = snapshotIndexer.fit(df).transform(df)
+df = checkinDateIndexer.fit(df).transform(df)
+df = hotelNameIndexer.fit(df).transform(df)
+df = weekDayIndexer.fit(df).transform(df)
+df = df.drop('SnapshotDate')
+df = df.drop('CheckinDate')
+df = df.drop('HotelName')
+df = df.drop('WeekDay')
+df = df.withColumnRenamed('SnapshotDateIndex', 'SnapshotDate')\
+    .withColumnRenamed('CheckinDateIndex','CheckinDate')\
+    .withColumnRenamed('HotelNameIndex','HotelName')\
+    .withColumnRenamed('WeekDayIndex','WeekDay')
+
+df.show()
+
+features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
+
+X = df[features]
+y = df["DiscountCode"]
+columns_names=X.schema.names
+
+# DECISION TREE CLASSIFIER
+print("------------------------DECISION TREE-----------------------")
+print()
+#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+
+(trainingData, testData) = df.randomSplit([0.7, 0.3])
+
+# Train a DecisionTree model.
+#  Empty categoricalFeaturesInfo indicates all features are continuous.
+model = DecisionTree.trainClassifier(trainingData, numClasses=4, categoricalFeaturesInfo={},
+                                     impurity='gini', maxDepth=5, maxBins=32)
+
+# Evaluate model on test instances and compute test error
+predictions = model.predict(testData.map(lambda x: x.features))
+
+
+
+# encoder = OneHotEncoder(includeFirst=False, inputCol="SnapshotDateIndex", outputCol="SnapshotDateVec")
+# encoded = encoder.transform(indexed)
 #print(encoded)
 
 # df['WeekDay'] = df['WeekDay'].apply(translate1)
@@ -67,4 +106,4 @@ df.show()
 # df['CheckinDate'] = df['CheckinDate'].apply(translate3)
 # df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
 
-df.show()
+#df.show()
