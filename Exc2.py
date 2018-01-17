@@ -128,7 +128,7 @@ columns_names=X.columns.values
 
 # NAIVE BAYES CLASSIFIER
 print("-------------------------NAIVE BAYES------------------------")
-nb =GaussianNB()
+nb = GaussianNB()
 X1_train, X1_test, y1_train, y1_test = train_test_split(X, y, random_state=1)
 nb.fit(X1_train, y1_train)
 predicted = nb.predict(X1_test)

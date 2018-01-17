@@ -85,6 +85,7 @@ print("------------------------DECISION TREE-----------------------")
 print()
 #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 
+
 (trainingData, testData) = df.randomSplit([0.7, 0.3])
 
 # Train a DecisionTree model.
