@@ -54,7 +54,7 @@ ndf = pysql(mdfq).rename(columns=names)
 # print(ndf)
 
 print("-------------------QUEREY 3.1-------------------")
-df31 = pysql('select distinct DiscountCode from df where DiscountCode in (1,2,3,4)') #TODO - fix!
+df31 = pysql('select distinct DiscountCode from df where DiscountCode in (1,2,3,4)')
 # print(df31)
 
 print("-------------------QUEREY 3.2-------------------")
