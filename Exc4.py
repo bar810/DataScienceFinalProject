@@ -4,26 +4,24 @@ from pyspark.mllib.tree import DecisionTree
 from pyspark.sql import SparkSession
 import pandasql as pdsql
 from sklearn.cross_validation import train_test_split
+from pyspark.ml.feature import VectorAssembler
 
 pysql = lambda q: pdsql.sqldf(q, globals())
 
-dfTemp = pd.read_csv('test.csv')
-
-dfTemp2 = pysql('select name,code, min(price) from dfTemp group by name')
-
+#dfTemp = pd.read_csv('Hotels_data_Changed.csv')
+#dfTemp2 = pysql('select name,code, min(price) from dfTemp group by name')
 #print(dfTemp2)
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
-
-
-dfTemp = spark.read.csv('test.csv', header=True)
-dfTemp.createOrReplaceTempView('dfTemp')
-
-dfTemp2 = spark.sql('select a.name,a.code,a.price '
-                    'from dfTemp a '
-                    '   left outer join dfTemp b '
-                    '   on a.name = b.name and b.price < a.price '
-                    'where b.name is null')
+#
+# dfTemp = spark.read.csv('Hotels_data_Changed.csv', header=True)
+# dfTemp.createOrReplaceTempView('dfTemp')
+#
+# dfTemp2 = spark.sql('select a.name,a.code,a.price '
+#                     'from dfTemp a '
+#                     '   left outer join dfTemp b '
+#                     '   on a.name = b.name and b.price < a.price '
+#                     'where b.name is null')
 #
 #dfTemp2.show()
 
@@ -53,8 +51,6 @@ query = 'select a.SnapshotDate, a.CheckinDate, a.DiscountCode, a.HotelName, a.Da
 
 df = spark.sql(query)
 
-df.show()
-
 snapshotIndexer = StringIndexer(inputCol="SnapshotDate", outputCol="SnapshotDateIndex")
 checkinDateIndexer = StringIndexer(inputCol="CheckinDate", outputCol="CheckinDateIndex")
 hotelNameIndexer = StringIndexer(inputCol="HotelName", outputCol="HotelNameIndex")
@@ -72,39 +68,49 @@ df = df.withColumnRenamed('SnapshotDateIndex', 'SnapshotDate')\
     .withColumnRenamed('HotelNameIndex','HotelName')\
     .withColumnRenamed('WeekDayIndex','WeekDay')
 
-df.show()
+assembler = VectorAssembler(
+  inputCols=['SnapshotDate',
+             'CheckinDate',
+             'HotelName',
+             'WeekDay'], outputCol="features")
 
-features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
+output = assembler.transform(df).select('DiscountCode','features')
 
-X = df[features]
-y = df["DiscountCode"]
-columns_names=X.schema.names
+#features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
+
+#X = output[features]
+#y = output["DiscountCode"]
+#columns_names=X.schema.names
 
 # DECISION TREE CLASSIFIER
 print("------------------------DECISION TREE-----------------------")
 print()
 #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-
-
-(trainingData, testData) = df.randomSplit([0.7, 0.3])
-
+# (trainingData, testData) = output.randomSplit([0.7, 0.3])
 # Train a DecisionTree model.
 #  Empty categoricalFeaturesInfo indicates all features are continuous.
-model = DecisionTree.trainClassifier(trainingData, numClasses=4, categoricalFeaturesInfo={},
-                                     impurity='gini', maxDepth=5, maxBins=32)
-
+# model = DecisionTree.trainClassifier(trainingData, numClasses=4, categoricalFeaturesInfo={},
+#                                      impurity='gini', maxDepth=5, maxBins=32)
 # Evaluate model on test instances and compute test error
-predictions = model.predict(testData.map(lambda x: x.features))
-
-
-
+#predictions = model.predict(testData.map(lambda x: x.features))
+# from pyspark.ml.regression import LinearRegression
+# Create a Linear Regression Model object
+#lr = LinearRegression(labelCol='DiscountCode')
+# Fit the model to the data and call this model lrModel
+#lrModel = lr.fit(trainingData)
 # encoder = OneHotEncoder(includeFirst=False, inputCol="SnapshotDateIndex", outputCol="SnapshotDateVec")
 # encoded = encoder.transform(indexed)
 #print(encoded)
-
 # df['WeekDay'] = df['WeekDay'].apply(translate1)
 # df['HotelName'] = df['HotelName'].apply(translate2)
 # df['CheckinDate'] = df['CheckinDate'].apply(translate3)
 # df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
-
 #df.show()
+print("-------------------------NAIVE BAYES------------------------")
+print()
+# Split data aproximately into training (60%) and test (40%)
+training, test = output.randomSplit([0.6, 0.4], seed=0)
+training.show()
+# Train a naive Bayes model.
+from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
+model = NaiveBayes.train(training, 1.0)
