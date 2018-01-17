@@ -4,17 +4,13 @@ from pyspark.mllib.tree import DecisionTree, DecisionTreeModel
 from pyspark.mllib.util import MLUtils
 from pyspark.sql import SparkSession
 
-sc = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
+sc = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate().sparkContext
 
-lines = sc.read.text('text.txt').rdd
-parsed = lines.map(lambda l: MLUtils._parse_libsvm_line(l))
+data = MLUtils.loadLibSVMFile(sc, 'text.txt')
 
-parsed.cache()
-numFeatures = parsed.map(lambda x: -1 if x[1].size == 0 else x[1][-1]).reduce(max) + 1
-data = parsed.map(lambda x: LabeledPoint(x[0], Vectors.sparse(numFeatures, x[1], x[2])))
+print(data)
+#print(data)
 
-# Load and parse the data file into an RDD of LabeledPoint.
-#data = MLUtils.loadLibSVMFile(sc, 'text.txt')
 # Split the data into training and test sets (30% held out for testing)
 (trainingData, testData) = data.randomSplit([0.7, 0.3])
 
@@ -33,5 +29,5 @@ print('Learned regression tree model:')
 print(model.toDebugString())
 
 # Save and load model
-model.save(sc, "target/tmp/myDecisionTreeRegressionModel")
+#model.save(sc, "target/tmp/myDecisionTreeRegressionModel")
 sameModel = DecisionTreeModel.load(sc, "target/tmp/myDecisionTreeRegressionModel")

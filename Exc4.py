@@ -1,31 +1,18 @@
 import pandas as pd
 from pyspark.ml.feature import StringIndexer, OneHotEncoder
+from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.tree import DecisionTree
 from pyspark.sql import SparkSession
 import pandasql as pdsql
 from sklearn.cross_validation import train_test_split
 from pyspark.ml.feature import VectorAssembler
 
+from pyspark.mllib.regression import LabeledPoint
+
+
 pysql = lambda q: pdsql.sqldf(q, globals())
 
-#dfTemp = pd.read_csv('Hotels_data_Changed.csv')
-#dfTemp2 = pysql('select name,code, min(price) from dfTemp group by name')
-#print(dfTemp2)
-
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
-#
-# dfTemp = spark.read.csv('Hotels_data_Changed.csv', header=True)
-# dfTemp.createOrReplaceTempView('dfTemp')
-#
-# dfTemp2 = spark.sql('select a.name,a.code,a.price '
-#                     'from dfTemp a '
-#                     '   left outer join dfTemp b '
-#                     '   on a.name = b.name and b.price < a.price '
-#                     'where b.name is null')
-#
-#dfTemp2.show()
-
-#keep_col = ['Snapshot Date', 'Checkin Date', 'Discount Code', 'Hotel Name', 'DayDiff', 'WeekDay', 'DiscountDiff']
 
 cf = spark.read.csv('Hotels_data_Changed.csv', header=True)\
     .withColumnRenamed('Snapshot ID', 'SnapshotID')\
@@ -39,8 +26,6 @@ cf = spark.read.csv('Hotels_data_Changed.csv', header=True)\
     .withColumnRenamed('Hotel Stars', 'HotelStars')
 
 cf.createOrReplaceTempView('cf')
-
-#srcDf.show()
 
 query = 'select a.SnapshotDate, a.CheckinDate, a.DiscountCode, a.HotelName, a.DayDiff, a.WeekDay, a.DiscountDiff ' \
         'from cf a ' \
@@ -74,13 +59,24 @@ assembler = VectorAssembler(
              'HotelName',
              'WeekDay'], outputCol="features")
 
-output = assembler.transform(df).select('DiscountCode','features')
+output = assembler.transform(df).select('DiscountCode','features').withColumnRenamed('DiscountCode', 'label')
 
-#features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
+output.show()
 
-#X = output[features]
-#y = output["DiscountCode"]
-#columns_names=X.schema.names
+
+from pyspark.mllib import linalg as mllib_linalg
+from pyspark.ml import linalg as ml_linalg
+
+def as_old(v):
+    if isinstance(v, ml_linalg.SparseVector):
+        return mllib_linalg.SparseVector(v.size, v.indices, v.values)
+    if isinstance(v, ml_linalg.DenseVector):
+        return mllib_linalg.DenseVector(v.values)
+    raise ValueError("Unsupported type {0}".format(type(v)))
+
+lambda row: LabeledPoint(row.label, as_old(row.features))
+
+output = output.rdd.map(lambda row: LabeledPoint(row.label, as_old(row.features)))
 
 # DECISION TREE CLASSIFIER
 print("------------------------DECISION TREE-----------------------")
@@ -107,10 +103,16 @@ print()
 # df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
 #df.show()
 print("-------------------------NAIVE BAYES------------------------")
-print()
+print(output)
 # Split data aproximately into training (60%) and test (40%)
 training, test = output.randomSplit([0.6, 0.4], seed=0)
-training.show()
+#training.show()
 # Train a naive Bayes model.
 from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
 model = NaiveBayes.train(training, 1.0)
+print(model)
+
+
+
+
+
