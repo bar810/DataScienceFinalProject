@@ -1,14 +1,28 @@
+import os
+from pyspark.mllib import linalg as mllib_linalg
+from pyspark.ml import linalg as ml_linalg
 import pandas as pd
 from pyspark.ml.feature import StringIndexer, OneHotEncoder
+from pyspark.mllib.evaluation import MulticlassMetrics
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.tree import DecisionTree
 from pyspark.sql import SparkSession
 import pandasql as pdsql
 from sklearn.cross_validation import train_test_split
 from pyspark.ml.feature import VectorAssembler
-
 from pyspark.mllib.regression import LabeledPoint
 
+os.environ["PYSPARK_PYTHON"]="python3"
+os.environ["PYSPARK_DRIVER_PYTHON"]="python3"
+
+def as_old(v):
+    if isinstance(v, ml_linalg.SparseVector):
+        return mllib_linalg.SparseVector(v.size, v.indices, v.values)
+    if isinstance(v, ml_linalg.DenseVector):
+        return mllib_linalg.DenseVector(v.values)
+    raise ValueError("Unsupported type {0}".format(type(v)))
+
+lambda row: LabeledPoint(row.label, as_old(row.features))
 
 pysql = lambda q: pdsql.sqldf(q, globals())
 
@@ -61,58 +75,24 @@ assembler = VectorAssembler(
 
 output = assembler.transform(df).select('DiscountCode','features').withColumnRenamed('DiscountCode', 'label')
 
-output.show()
-
-
-from pyspark.mllib import linalg as mllib_linalg
-from pyspark.ml import linalg as ml_linalg
-
-def as_old(v):
-    if isinstance(v, ml_linalg.SparseVector):
-        return mllib_linalg.SparseVector(v.size, v.indices, v.values)
-    if isinstance(v, ml_linalg.DenseVector):
-        return mllib_linalg.DenseVector(v.values)
-    raise ValueError("Unsupported type {0}".format(type(v)))
-
-lambda row: LabeledPoint(row.label, as_old(row.features))
-
 output = output.rdd.map(lambda row: LabeledPoint(row.label, as_old(row.features)))
 
 # DECISION TREE CLASSIFIER
 print("------------------------DECISION TREE-----------------------")
-print()
-#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-# (trainingData, testData) = output.randomSplit([0.7, 0.3])
-# Train a DecisionTree model.
-#  Empty categoricalFeaturesInfo indicates all features are continuous.
-# model = DecisionTree.trainClassifier(trainingData, numClasses=4, categoricalFeaturesInfo={},
-#                                      impurity='gini', maxDepth=5, maxBins=32)
-# Evaluate model on test instances and compute test error
-#predictions = model.predict(testData.map(lambda x: x.features))
-# from pyspark.ml.regression import LinearRegression
-# Create a Linear Regression Model object
-#lr = LinearRegression(labelCol='DiscountCode')
-# Fit the model to the data and call this model lrModel
-#lrModel = lr.fit(trainingData)
-# encoder = OneHotEncoder(includeFirst=False, inputCol="SnapshotDateIndex", outputCol="SnapshotDateVec")
-# encoded = encoder.transform(indexed)
-#print(encoded)
-# df['WeekDay'] = df['WeekDay'].apply(translate1)
-# df['HotelName'] = df['HotelName'].apply(translate2)
-# df['CheckinDate'] = df['CheckinDate'].apply(translate3)
-# df['SnapshotDate'] = df['SnapshotDate'].apply(translate4)
-#df.show()
-print("-------------------------NAIVE BAYES------------------------")
-print(output)
-# Split data aproximately into training (60%) and test (40%)
 training, test = output.randomSplit([0.6, 0.4], seed=0)
-#training.show()
-# Train a naive Bayes model.
-from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
-model = NaiveBayes.train(training, 1.0)
-print(model)
+treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
+                                     impurity='gini', maxDepth=5, maxBins=32)
 
 
-
-
-
+# print("-------------------------NAIVE BAYES------------------------")
+# # Split data aproximately into training (60%) and test (40%)
+# training, test = output.randomSplit([0.6, 0.4], seed=0)
+# #training.show()
+# # Train a naive Bayes model.
+# from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
+# naiveModel = NaiveBayes.train(training, 1.0)
+#
+# # Make prediction and test accuracy.
+# predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
+# accuracy = 1.0 * predictionAndLabel.filter(lambda pl: pl[0] == pl[1]).count() / test.count()
+# print('accuracy is: {}'.format(accuracy))
