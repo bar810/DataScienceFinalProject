@@ -83,6 +83,11 @@ training, test = output.randomSplit([0.6, 0.4], seed=0)
 treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
                                      impurity='gini', maxDepth=5, maxBins=32)
 
+predictions = treeModel.predict(test.map(lambda x: x.features))
+labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions)
+testErr = labelsAndPredictions.filter(
+        lambda lp: lp[0] != lp[1]).count() / float(test.count())
+print('Test Error = ' + str(testErr))
 
 # print("-------------------------NAIVE BAYES------------------------")
 # # Split data aproximately into training (60%) and test (40%)
