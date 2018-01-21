@@ -22,8 +22,21 @@ def as_old(v):
         return mllib_linalg.DenseVector(v.values)
     raise ValueError("Unsupported type {0}".format(type(v)))
 
-lambda row: LabeledPoint(row.label, as_old(row.features))
+def printStatistics(labelsAndPredictions):
+    metrics = MulticlassMetrics(labelsAndPredictions)
+    # accuracy=metrics.accuracy()
+    tp=metrics.truePositiveRate
+    fp=metrics.falsePositiveRate
+    recall = metrics.recall()
+    precision = metrics.precision()
+    # print("Accuracy = %s" % accuracy)
+    print("tp = %s" % tp)
+    print("fp = %s" % fp)
+    print("Recall = %s" % recall)
+    print("Precision = %s" % precision)
 
+
+lambda row: LabeledPoint(row.label, as_old(row.features))
 pysql = lambda q: pdsql.sqldf(q, globals())
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
@@ -82,12 +95,13 @@ print("------------------------DECISION TREE-----------------------")
 training, test = output.randomSplit([0.6, 0.4], seed=0)
 treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
                                      impurity='gini', maxDepth=5, maxBins=32)
-
 predictions = treeModel.predict(test.map(lambda x: x.features))
 labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions)
-testErr = labelsAndPredictions.filter(
-        lambda lp: lp[0] != lp[1]).count() / float(test.count())
-print('Test Error = ' + str(testErr))
+printStatistics(labelsAndPredictions)
+
+
+
+
 
 # print("-------------------------NAIVE BAYES------------------------")
 # # Split data aproximately into training (60%) and test (40%)
