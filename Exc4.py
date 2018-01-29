@@ -22,18 +22,20 @@ def as_old(v):
         return mllib_linalg.DenseVector(v.values)
     raise ValueError("Unsupported type {0}".format(type(v)))
 
-def printStatistics(labelsAndPredictions):
+def printStatistics(labelsAndPredictions, data):
     metrics = MulticlassMetrics(labelsAndPredictions)
-    # accuracy=metrics.accuracy()
-    tp=metrics.truePositiveRate
-    fp=metrics.falsePositiveRate
+    labels = data.map(lambda lp: lp.label).distinct().collect()
+    print('')
+    print('accuracy: ' + str(metrics.accuracy))
+    for label in labels:
+        print('label: ' + str(label))
+        print('fp: ' + str(metrics.falsePositiveRate(label)))
+        print('tp: ' + str(metrics.truePositiveRate(label)))
     recall = metrics.recall()
     precision = metrics.precision()
-    # print("Accuracy = %s" % accuracy)
-    print("tp = %s" % tp)
-    print("fp = %s" % fp)
     print("Recall = %s" % recall)
     print("Precision = %s" % precision)
+    # print("Area under ROC = %s" % metrics.areaUnderROC)
 
 
 lambda row: LabeledPoint(row.label, as_old(row.features))
@@ -90,28 +92,28 @@ output = assembler.transform(df).select('DiscountCode','features').withColumnRen
 
 output = output.rdd.map(lambda row: LabeledPoint(row.label, as_old(row.features)))
 
-# DECISION TREE CLASSIFIER
-print("------------------------DECISION TREE-----------------------")
-training, test = output.randomSplit([0.6, 0.4], seed=0)
-treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
-                                     impurity='gini', maxDepth=5, maxBins=32)
-predictions = treeModel.predict(test.map(lambda x: x.features))
-labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions)
-printStatistics(labelsAndPredictions)
-
-
-
-
-
-# print("-------------------------NAIVE BAYES------------------------")
-# # Split data aproximately into training (60%) and test (40%)
+# # DECISION TREE CLASSIFIER
+# print("------------------------DECISION TREE-----------------------")
 # training, test = output.randomSplit([0.6, 0.4], seed=0)
-# #training.show()
-# # Train a naive Bayes model.
-# from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
-# naiveModel = NaiveBayes.train(training, 1.0)
-#
-# # Make prediction and test accuracy.
-# predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
-# accuracy = 1.0 * predictionAndLabel.filter(lambda pl: pl[0] == pl[1]).count() / test.count()
-# print('accuracy is: {}'.format(accuracy))
+# treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
+#                                      impurity='gini', maxDepth=5, maxBins=32)
+# predictions = treeModel.predict(test.map(lambda x: x.features))
+# labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions)
+# printStatistics(labelsAndPredictions, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+
+
+
+
+
+print("-------------------------NAIVE BAYES------------------------")
+# Split data aproximately into training (60%) and test (40%)
+training, test = output.randomSplit([0.6, 0.4], seed=0)
+#training.show()
+# Train a naive Bayes model.
+from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
+naiveModel = NaiveBayes.train(training, 1.0)
+
+# Make prediction and test accuracy.
+predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
+printStatistics(predictionAndLabel, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+
