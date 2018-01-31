@@ -1,7 +1,13 @@
+import os
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
+from scipy.cluster import hierarchy
+from matplotlib import pyplot as plt
 
+os.environ["PYSPARK_PYTHON"]="python3"
+os.environ["PYSPARK_DRIVER_PYTHON"]="python3"
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
 origDf = spark.read.csv('hotels_data.csv', header=True)\
@@ -87,5 +93,28 @@ pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
 
+prePivotDf.withColumn('norm_val', (prePivotDf.DiscountPrice-min)/(max-min))
 
 
+
+# pivotDf = prePivotDf.groupby('HotelName')\
+#                     .pivot('combo')\
+#                     .avg('DiscountPrice')
+# pivotDf = pivotDf.fillna(-1)
+# pivotDf.createOrReplaceTempView('pivotDf')
+# pivotDf.show()
+
+# # dendrogram
+# scaled_df=pivotDf.toPandas()
+# scaled_df = scaled_df.set_index('HotelName')
+# print()
+# del scaled_df.index.name
+# # Calculate the distance between each sample
+# Z = hierarchy.linkage(scaled_df, 'ward')
+# # Plot with Custom leaves
+# hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
+# plt.show()
+#
+#
+#
+#
