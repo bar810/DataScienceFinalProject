@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
 from pyspark.ml.feature import Normalizer, MinMaxScaler
+from scipy.cluster import hierarchy
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
@@ -102,5 +103,16 @@ pivotDf = prePivotNormalizeDf.groupby('HotelName')\
 pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
+
+# # dendrogram
+scaled_df=pivotDf.toPandas()
+scaled_df = scaled_df.set_index('HotelName')
+print()
+del scaled_df.index.name
+# Calculate the distance between each sample
+Z = hierarchy.linkage(scaled_df, 'ward')
+# Plot with Custom leaves
+hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
+plt.show()
 
 
