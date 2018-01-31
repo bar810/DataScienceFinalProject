@@ -1,13 +1,9 @@
-import os
-
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
+from pyspark.ml.feature import Normalizer, MinMaxScaler
 from scipy.cluster import hierarchy
-from matplotlib import pyplot as plt
 
-os.environ["PYSPARK_PYTHON"]="python3"
-os.environ["PYSPARK_DRIVER_PYTHON"]="python3"
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
 origDf = spark.read.csv('hotels_data.csv', header=True)\
@@ -86,35 +82,37 @@ prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.
 
 prePivotDf.createOrReplaceTempView('prePivotDf')
 
-pivotDf = prePivotDf.groupby('HotelName')\
+# normalizer = Normalizer(inputCol="DiscountPrice", outputCol="normPrice", p=1.0)
+# l1NormData = normalizer.transform(prePivotDf)
+
+minPrice = int(spark.sql('select min(DiscountPrice) from prePivotDf').collect()[0][0])
+maxPrice = int(spark.sql('select max(DiscountPrice) from prePivotDf').collect()[0][0])
+
+print('minPrice: ' + str(minPrice))
+print('maxPrice: ' + str(maxPrice))
+
+prePivotNormalizeDf = prePivotDf.withColumn('norm', ((prePivotDf.DiscountPrice-minPrice)/(maxPrice-minPrice) * 100).cast('int'))\
+                                .drop('DiscountPrice')\
+                                .withColumnRenamed('norm', 'DiscountPriceNormalized')
+
+#prePivotNormalizeDf.show()
+
+pivotDf = prePivotNormalizeDf.groupby('HotelName')\
                     .pivot('combo')\
-                    .avg('DiscountPrice')
+                    .avg('DiscountPriceNormalized')
 pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
 
-prePivotDf.withColumn('norm_val', (prePivotDf.DiscountPrice-min)/(max-min))
-
-
-
-# pivotDf = prePivotDf.groupby('HotelName')\
-#                     .pivot('combo')\
-#                     .avg('DiscountPrice')
-# pivotDf = pivotDf.fillna(-1)
-# pivotDf.createOrReplaceTempView('pivotDf')
-# pivotDf.show()
-
 # # dendrogram
-# scaled_df=pivotDf.toPandas()
-# scaled_df = scaled_df.set_index('HotelName')
-# print()
-# del scaled_df.index.name
-# # Calculate the distance between each sample
-# Z = hierarchy.linkage(scaled_df, 'ward')
-# # Plot with Custom leaves
-# hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
-# plt.show()
-#
-#
-#
-#
+scaled_df=pivotDf.toPandas()
+scaled_df = scaled_df.set_index('HotelName')
+print()
+del scaled_df.index.name
+# Calculate the distance between each sample
+Z = hierarchy.linkage(scaled_df, 'ward')
+# Plot with Custom leaves
+hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
+plt.show()
+
+
