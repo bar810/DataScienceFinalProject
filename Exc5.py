@@ -79,13 +79,11 @@ prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.
                         .withColumnRenamed('DiscountPriceInt', 'DiscountPrice')
 
 prePivotDf.createOrReplaceTempView('prePivotDf')
-prePivotDf.show()
-prePivotDf.printSchema()
 
 pivotDf = prePivotDf.groupby('HotelName')\
                     .pivot('combo')\
                     .avg('DiscountPrice')
-
+pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
 
