@@ -25,6 +25,9 @@ def as_old(v):
 def printStatistics(labelsAndPredictions, data):
     metrics = MulticlassMetrics(labelsAndPredictions)
     labels = data.map(lambda lp: lp.label).distinct().collect()
+    print("confusion metrics:")
+    cm = metrics.confusionMatrix()
+    print(cm)
     print('')
     print('accuracy: ' + str(metrics.accuracy))
     for label in labels:
@@ -65,6 +68,10 @@ query = 'select a.SnapshotDate, a.CheckinDate, a.DiscountCode, a.HotelName, a.Da
 
 df = spark.sql(query)
 
+df2 = df
+
+df2.createOrReplaceTempView('df2')
+
 snapshotIndexer = StringIndexer(inputCol="SnapshotDate", outputCol="SnapshotDateIndex")
 checkinDateIndexer = StringIndexer(inputCol="CheckinDate", outputCol="CheckinDateIndex")
 hotelNameIndexer = StringIndexer(inputCol="HotelName", outputCol="HotelNameIndex")
@@ -92,28 +99,29 @@ output = assembler.transform(df).select('DiscountCode','features').withColumnRen
 
 output = output.rdd.map(lambda row: LabeledPoint(row.label, as_old(row.features)))
 
-# # DECISION TREE CLASSIFIER
-# print("------------------------DECISION TREE-----------------------")
-# training, test = output.randomSplit([0.6, 0.4], seed=0)
-# treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
-#                                      impurity='gini', maxDepth=5, maxBins=32)
-# predictions = treeModel.predict(test.map(lambda x: x.features))
-# labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions)
-# printStatistics(labelsAndPredictions, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
-
-
-
+# DECISION TREE CLASSIFIER
+print("------------------------DECISION TREE-----------------------")
+training, test = output.randomSplit([0.6, 0.4], seed=0)
+treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
+                                     impurity='gini', maxDepth=5, maxBins=32)
+predictions1 = treeModel.predict(test.map(lambda x: x.features))
+labelsAndPredictions1 = test.map(lambda lp: lp.label).zip(predictions1)
+#printStatistics(labelsAndPredictions, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
 
 
 print("-------------------------NAIVE BAYES------------------------")
 # Split data aproximately into training (60%) and test (40%)
-training, test = output.randomSplit([0.6, 0.4], seed=0)
+#training, test = output.randomSplit([0.6, 0.4], seed=0)
 #training.show()
 # Train a naive Bayes model.
 from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
 naiveModel = NaiveBayes.train(training, 1.0)
 
 # Make prediction and test accuracy.
-predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
-printStatistics(predictionAndLabel, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+#predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
+#printStatistics(predictionAndLabel, output) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+
+predictions2 = naiveModel.predict(test.map(lambda x: x.features))
+labelsAndPredictions2 = test.map(lambda lp: lp.label).zip(predictions2)
+printStatistics(labelsAndPredictions2, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
 
