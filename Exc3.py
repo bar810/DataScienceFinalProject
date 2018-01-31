@@ -4,7 +4,7 @@ from scipy.cluster import hierarchy
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn import preprocessing
 import numpy as np
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from dateutil import parser
 
 
