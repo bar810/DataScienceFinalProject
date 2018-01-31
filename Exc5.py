@@ -3,6 +3,11 @@ from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
 from pyspark.ml.feature import Normalizer, MinMaxScaler
 from scipy.cluster import hierarchy
+from matplotlib import pyplot as plt
+import os
+
+os.environ["PYSPARK_PYTHON"]="python3"
+os.environ["PYSPARK_DRIVER_PYTHON"]="python3"
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
@@ -91,7 +96,7 @@ maxPrice = int(spark.sql('select max(DiscountPrice) from prePivotDf').collect()[
 print('minPrice: ' + str(minPrice))
 print('maxPrice: ' + str(maxPrice))
 
-prePivotNormalizeDf = prePivotDf.withColumn('norm', ((prePivotDf.DiscountPrice-minPrice)/(maxPrice-minPrice) * 100).cast('int'))\
+prePivotNormalizeDf = prePivotDf.withColumn('norm', ((prePivotDf.DiscountPrice-minPrice)/(maxPrice-minPrice) * 100).cast('double'))\
                                 .drop('DiscountPrice')\
                                 .withColumnRenamed('norm', 'DiscountPriceNormalized')
 
@@ -113,6 +118,7 @@ del scaled_df.index.name
 Z = hierarchy.linkage(scaled_df, 'ward')
 # Plot with Custom leaves
 hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
+
 plt.show()
 
 
