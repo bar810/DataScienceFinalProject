@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
-from pyspark.sql.types import StringType, IntegerType
+from pyspark.sql.types import StringType
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
@@ -82,7 +82,12 @@ prePivotDf.createOrReplaceTempView('prePivotDf')
 prePivotDf.show()
 prePivotDf.printSchema()
 
-#pivotDf = prePivotDf.groupby(prePivotDf.HotelName)
+pivotDf = prePivotDf.groupby('HotelName')\
+                    .pivot('combo')\
+                    .avg('DiscountPrice')
+
+pivotDf.createOrReplaceTempView('pivotDf')
+pivotDf.show()
 
 
 
