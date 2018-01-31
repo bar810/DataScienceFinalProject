@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
+from pyspark.ml.feature import Normalizer, MinMaxScaler
 
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
@@ -80,12 +81,26 @@ prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.
 
 prePivotDf.createOrReplaceTempView('prePivotDf')
 
-pivotDf = prePivotDf.groupby('HotelName')\
+# normalizer = Normalizer(inputCol="DiscountPrice", outputCol="normPrice", p=1.0)
+# l1NormData = normalizer.transform(prePivotDf)
+
+minPrice = int(spark.sql('select min(DiscountPrice) from prePivotDf').collect()[0][0])
+maxPrice = int(spark.sql('select max(DiscountPrice) from prePivotDf').collect()[0][0])
+
+print('minPrice: ' + str(minPrice))
+print('maxPrice: ' + str(maxPrice))
+
+prePivotNormalizeDf = prePivotDf.withColumn('norm', ((prePivotDf.DiscountPrice-minPrice)/(maxPrice-minPrice) * 100).cast('int'))\
+                                .drop('DiscountPrice')\
+                                .withColumnRenamed('norm', 'DiscountPriceNormalized')
+
+#prePivotNormalizeDf.show()
+
+pivotDf = prePivotNormalizeDf.groupby('HotelName')\
                     .pivot('combo')\
-                    .avg('DiscountPrice')
+                    .avg('DiscountPriceNormalized')
 pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
-
 
 
