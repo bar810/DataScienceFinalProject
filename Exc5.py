@@ -31,14 +31,29 @@ checkinDf = spark.sql('select CheckinDate, count(CheckinDate) ' \
 checkinDf.createOrReplaceTempView('checkinDf')
 checkinDf.show()
 
-# bestDiscountCodesDf = spark.sql('select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) '\
-#                                 'from origDf '\
-#                                 'where HotelName in (select HotelName from hotelsDf) '\
-#                                 'and CheckinDate in (select CheckinDate from checkinDf) '\
-#                                 'group by HotelName, CheckinDate, DiscountCode')
-# bestDiscountCodesDf.createOrReplaceTempView('bestDiscountCodesDf')
+bestDiscountCodesDf = spark.sql('select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) '\
+                                'from origDf '\
+                                'where HotelName in (select HotelName from hotelsDf) '\
+                                'and CheckinDate in (select CheckinDate from checkinDf) '\
+                                'group by HotelName, CheckinDate, DiscountCode')
+bestDiscountCodesDf.createOrReplaceTempView('bestDiscountCodesDf')
+bestDiscountCodesDf.show()
 
+discountCodeDf = spark.sql('select DiscountCode '
+                           'from origDf '
+                           'group by DiscountCode')
+discountCodeDf.createOrReplaceTempView('discountCodeDf')
+discountCodeDf.show()
 
+checkinDateEditedDf = spark.sql('select CheckinDate '
+                                'from checkinDf '
+                                'group by CheckinDate')
+checkinDateEditedDf.createOrReplaceTempView('checkinDateEditedDf')
 
+crossJoinDf = spark.sql('select a.DiscountCode, b.CheckinDate '
+                       'from discountCodeDf a '
+                       '    cross join checkinDateEditedDf b')
 
+crossJoinDf.createOrReplaceTempView('crossJoinDf')
+crossJoinDf.show()
 
