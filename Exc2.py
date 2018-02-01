@@ -36,11 +36,10 @@ df = pysql(query)
 # PART 2.2
 # GET ONLY THE FEATURES I NEED
 features = ['SnapshotDate', 'CheckinDate', 'HotelName', 'WeekDay', 'DayDiff']
-df=df.head(1000)
 # DROP THE ROWS WITH MISSING VALUES
 df = df.dropna()
 
-# CONVERT THE FEATUERS TO NUMERIC: to translte back: le.transform(THE FITCHER NAME)
+# CONVERT THE FEATUERS TO NUMERIC: to translte back: le.transform(THE FETCHER NAME)
 translate1 = lambda row: wde.transform([row])[0]
 wde = preprocessing.LabelEncoder()
 wde.fit(df['WeekDay'])

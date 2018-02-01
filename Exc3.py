@@ -1,11 +1,7 @@
 import pandas as pd
 import pandasql as pdsql
 from scipy.cluster import hierarchy
-from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn import preprocessing
-import numpy as np
 from matplotlib import pyplot as plt
-from dateutil import parser
 
 
 def df_crossjoin(df1, df2, **kwargs):
@@ -32,7 +28,6 @@ q1 = 'select HotelName, count(HotelName) ' \
      'limit 150'
 
 df1 = pysql(q1)
-# print(hotelNamesDf)
 print("-------------------QUEREY 2-------------------")
 # 40 check in dates most records
 q2 = 'select CheckinDate, count(CheckinDate) ' \
@@ -42,7 +37,6 @@ q2 = 'select CheckinDate, count(CheckinDate) ' \
      'limit 40'
 
 df2 = pysql(q2)
-# print(df2)
 
 # DROP THE UNRELEVANT DATA FROM THE MAIN DATA FRAME
 mdfq = 'select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) ' \
@@ -54,20 +48,16 @@ mdfq = 'select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) ' \
 names = {'HotelName': 'HotelName', 'CheckinDate': 'CheckinDate', 'DiscountCode': 'DiscountCode',
          'min(DiscountPrice)': 'DiscountPrice'}
 ndf = pysql(mdfq).rename(columns=names)
-# print(ndf)
 
 print("-------------------QUEREY 3.1-------------------")
 df31 = pysql('select distinct DiscountCode from df where DiscountCode in (1,2,3,4)')
-# print(df31)
 
 print("-------------------QUEREY 3.2-------------------")
 df32 = df_crossjoin(df2[['CheckinDate']], df31[["DiscountCode"]])
-# print(df32)
 
 print("-------------------QUEREY 3.3-------------------")
 df33 = df32
 df33['datePlusCode'] = df32['CheckinDate'] + '_' + df32['DiscountCode']
-# print(df33)
 
 print("-------------------QUEREY 3.4-------------------")
 q34 = 'select a.HotelName, a.DiscountPrice, b.datePlusCode ' \
@@ -75,33 +65,30 @@ q34 = 'select a.HotelName, a.DiscountPrice, b.datePlusCode ' \
       'inner join df33 as b ' \
       'on a.DiscountCode=b.DiscountCode and a.CheckinDate=b.CheckinDate '
 df34 = pysql(q34)
-# print(df34)
+df34['DiscountPrice'] = df34['DiscountPrice'].astype('int')
+
+print("-------------------NORMALIZE-------------------")
+minPrice = pysql('select min(DiscountPrice) from df34')['min(DiscountPrice)'][0]
+print('minPrice: ' + str(minPrice))
+maxPrice = pysql('select max(DiscountPrice) from df34')['max(DiscountPrice)'][0]
+print('maxPrice: ' + str(maxPrice))
+
+df34['DiscountPrice'] = ((df34['DiscountPrice'] - minPrice) / (maxPrice - minPrice) * 100)
 
 print("-------------------QUEREY 4-------------------")
 df35 = df34.pivot(index='HotelName', columns='datePlusCode', values='DiscountPrice')
 df35.fillna(value=-1, inplace=True)  # TODO replace it to the step before.
+
+print(df35)
+
 df35.to_csv('pivot.csv')
-dfx = pd.read_csv('pivot.csv')
-# print(dfx)
-print("-------------------NORMALIZE-------------------")
-hotelNameList = dfx['HotelName']
-columns_names = dfx.columns.values
-dfn = dfx.drop('HotelName', 1)
-scalar = preprocessing.MinMaxScaler(copy=True, feature_range=(0, 100))
-scaled_df = scalar.fit_transform(dfn)
-scaled_df = pd.DataFrame(scaled_df)
-scaled_df.insert(0, 'HotelName', hotelNameList)
-scaled_df.to_csv('pivot_normalize.csv')
-scaled_df = pd.read_csv('pivot_normalize.csv', names=columns_names)
-scaled_df.drop(scaled_df.index[0], inplace=True)
-scaled_df.to_csv('pivot_normalize.csv')
+
+df35.drop(df35.index[0], inplace=True)
 
 print("-------------------CLUSTERING AND DENDOGRAM-------------------")
-scaled_df = scaled_df.set_index('HotelName')
 print()
-del scaled_df.index.name
 # Calculate the distance between each sample
-Z = hierarchy.linkage(scaled_df, 'ward')
+Z = hierarchy.linkage(df35, 'ward')
 # Plot with Custom leaves
-hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5, labels=scaled_df.index)
+hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5, labels=df35.index)
 plt.show()

@@ -8,7 +8,6 @@ import os
 os.environ["PYSPARK_PYTHON"] = "python3"
 os.environ["PYSPARK_DRIVER_PYTHON"] = "python3"
 
-
 def concat(value1, value2):
     return value1 + '_' + value2
 
@@ -75,7 +74,7 @@ prePivotDf = spark.sql('select a.HotelName, a.DiscountPrice, b.combo ' \
                        'on a.DiscountCode=b.DiscountCode '
                        '    and a.CheckinDate=b.CheckinDate ')
 
-prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.cast('int')) \
+prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.cast('double')) \
     .drop('DiscountPrice') \
     .withColumnRenamed('DiscountPriceInt', 'DiscountPrice')
 
@@ -100,7 +99,6 @@ pivotDf = prePivotNormalizeDf.groupby('HotelName') \
 pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
-
 # DENDROGRAM
 scaled_df = pivotDf.toPandas()
 scaled_df = scaled_df.set_index('HotelName')
