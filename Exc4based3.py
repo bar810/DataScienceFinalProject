@@ -9,6 +9,9 @@ import os
 os.environ["PYSPARK_PYTHON"]="python3"
 os.environ["PYSPARK_DRIVER_PYTHON"]="python3"
 
+def concat(value1, value2):
+   return value1 + '_' + value2
+
 spark = SparkSession.builder.appName("FinalProject").master("local[*]").getOrCreate()
 
 origDf = spark.read.csv('hotels_data.csv', header=True)\
@@ -22,7 +25,6 @@ origDf = spark.read.csv('hotels_data.csv', header=True)\
         .withColumnRenamed('Hotel Name', 'HotelName')\
         .withColumnRenamed('Hotel Stars', 'HotelStars')
 origDf.createOrReplaceTempView('origDf')
-#origDf.show()
 
 hotelsDf = spark.sql('select HotelName, count(HotelName) ' \
                         'from origDf '\
@@ -30,7 +32,6 @@ hotelsDf = spark.sql('select HotelName, count(HotelName) ' \
                         'order by count(HotelName) desc '\
                         'limit 150')
 hotelsDf.createOrReplaceTempView('hotelsDf')
-#hotelsDf.show()
 
 checkinDf = spark.sql('select CheckinDate, count(CheckinDate) ' \
                         'from origDf '\
@@ -38,7 +39,6 @@ checkinDf = spark.sql('select CheckinDate, count(CheckinDate) ' \
                         'order by count(CheckinDate) desc '\
                         'limit 40')
 checkinDf.createOrReplaceTempView('checkinDf')
-#checkinDf.show()
 
 bestDiscountCodesDf = spark.sql('select HotelName, CheckinDate,DiscountCode, min(DiscountPrice) '\
                                 'from origDf '\
@@ -47,13 +47,11 @@ bestDiscountCodesDf = spark.sql('select HotelName, CheckinDate,DiscountCode, min
                                 'group by HotelName, CheckinDate, DiscountCode')
 bestDiscountCodesDf = bestDiscountCodesDf.withColumnRenamed('min(DiscountPrice)', 'DiscountPrice')
 bestDiscountCodesDf.createOrReplaceTempView('bestDiscountCodesDf')
-#bestDiscountCodesDf.show()
 
 discountCodeDf = spark.sql('select DiscountCode '
                            'from origDf '
                            'group by DiscountCode')
 discountCodeDf.createOrReplaceTempView('discountCodeDf')
-#discountCodeDf.show()
 
 checkinDateEditedDf = spark.sql('select CheckinDate '
                                 'from checkinDf '
@@ -64,16 +62,11 @@ crossJoinDf = spark.sql('select a.DiscountCode as DiscountCode, b.CheckinDate as
                        'from discountCodeDf a '
                        '    cross join checkinDateEditedDf b')
 crossJoinDf.createOrReplaceTempView('crossJoinDf')
-#crossJoinDf.show()
-
-def concat(value1, value2):
-   return value1 + '_' + value2
 
 udfconcat = udf(concat, StringType())
 
 crossJoinDf = crossJoinDf.withColumn('combo', udfconcat('CheckinDate', 'DiscountCode'))
 crossJoinDf.createOrReplaceTempView('crossJoinDf')
-#crossJoinDf.show()
 
 prePivotDf = spark.sql('select a.HotelName, a.DiscountPrice, b.combo '\
                         'from bestDiscountCodesDf as a '\
@@ -87,9 +80,6 @@ prePivotDf = prePivotDf.withColumn('DiscountPriceInt', prePivotDf.DiscountPrice.
 
 prePivotDf.createOrReplaceTempView('prePivotDf')
 
-# normalizer = Normalizer(inputCol="DiscountPrice", outputCol="normPrice", p=1.0)
-# l1NormData = normalizer.transform(prePivotDf)
-
 minPrice = int(spark.sql('select min(DiscountPrice) from prePivotDf').collect()[0][0])
 maxPrice = int(spark.sql('select max(DiscountPrice) from prePivotDf').collect()[0][0])
 
@@ -99,9 +89,7 @@ print('maxPrice: ' + str(maxPrice))
 prePivotNormalizeDf = prePivotDf.withColumn('norm', ((prePivotDf.DiscountPrice-minPrice)/(maxPrice-minPrice) * 100).cast('double'))\
                                 .drop('DiscountPrice')\
                                 .withColumnRenamed('norm', 'DiscountPriceNormalized')
-
-#prePivotNormalizeDf.show()
-
+#PIVOT
 pivotDf = prePivotNormalizeDf.groupby('HotelName')\
                     .pivot('combo')\
                     .avg('DiscountPriceNormalized')
@@ -109,7 +97,7 @@ pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
 
-# # dendrogram
+# dendrogram
 scaled_df=pivotDf.toPandas()
 scaled_df = scaled_df.set_index('HotelName')
 print()
@@ -118,7 +106,6 @@ del scaled_df.index.name
 Z = hierarchy.linkage(scaled_df, 'ward')
 # Plot with Custom leaves
 hierarchy.dendrogram(Z, leaf_rotation=90, leaf_font_size=5,labels=scaled_df.index)
-
 plt.show()
 
 

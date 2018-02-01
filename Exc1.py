@@ -19,4 +19,5 @@ df['DiscountDiff'] = pd.to_numeric(df['Original Price']) - pd.to_numeric(df['Dis
 # ADD COLUMNS DISCOUNTPERC - THE PERCENT OF THE DISCOUNT
 df['DiscountPerc'] = (pd.to_numeric(df['DiscountDiff']) / pd.to_numeric(df['Original Price'])) * 100
 
+# CREATE NEW .CSV FILE
 df.to_csv('Hotels_data_Changed.csv', index=False)

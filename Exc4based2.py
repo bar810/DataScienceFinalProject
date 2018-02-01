@@ -106,7 +106,7 @@ treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeat
                                      impurity='gini', maxDepth=5, maxBins=32)
 predictions1 = treeModel.predict(test.map(lambda x: x.features))
 labelsAndPredictions1 = test.map(lambda lp: lp.label).zip(predictions1)
-#printStatistics(labelsAndPredictions, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+#printStatistics(labelsAndPredictions, test)
 
 
 print("-------------------------NAIVE BAYES------------------------")
@@ -119,9 +119,9 @@ naiveModel = NaiveBayes.train(training, 1.0)
 
 # Make prediction and test accuracy.
 #predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
-#printStatistics(predictionAndLabel, output) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+#printStatistics(predictionAndLabel, output)
 
 predictions2 = naiveModel.predict(test.map(lambda x: x.features))
 labelsAndPredictions2 = test.map(lambda lp: lp.label).zip(predictions2)
-printStatistics(labelsAndPredictions2, test) #TODO CHECK IF THIS IS THE RIGHT PARAMETER
+printStatistics(labelsAndPredictions2, test)
 
