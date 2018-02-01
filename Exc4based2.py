@@ -102,26 +102,26 @@ output = output.rdd.map(lambda row: LabeledPoint(row.label, as_old(row.features)
 # DECISION TREE CLASSIFIER
 print("------------------------DECISION TREE-----------------------")
 training, test = output.randomSplit([0.6, 0.4], seed=0)
-treeModel = DecisionTree.trainClassifier(training, numClasses=5, categoricalFeaturesInfo={},
-                                     impurity='gini', maxDepth=5, maxBins=32)
+treeModel = DecisionTree.trainClassifier(training, numClasses=4, categoricalFeaturesInfo={},
+                                     impurity='gini', maxDepth=20, maxBins=32)
 predictions1 = treeModel.predict(test.map(lambda x: x.features))
-labelsAndPredictions1 = test.map(lambda lp: lp.label).zip(predictions1)
-#printStatistics(labelsAndPredictions, test)
+labelsAndPredictions = test.map(lambda lp: lp.label).zip(predictions1)
+printStatistics(labelsAndPredictions, test)
 
 
-print("-------------------------NAIVE BAYES------------------------")
-# Split data aproximately into training (60%) and test (40%)
-#training, test = output.randomSplit([0.6, 0.4], seed=0)
-#training.show()
-# Train a naive Bayes model.
-from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
-naiveModel = NaiveBayes.train(training, 1.0)
-
-# Make prediction and test accuracy.
-#predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
-#printStatistics(predictionAndLabel, output)
-
-predictions2 = naiveModel.predict(test.map(lambda x: x.features))
-labelsAndPredictions2 = test.map(lambda lp: lp.label).zip(predictions2)
-# printStatistics(labelsAndPredictions2, test)
-
+# print("-------------------------NAIVE BAYES------------------------")
+# # Split data aproximately into training (60%) and test (40%)
+# #training, test = output.randomSplit([0.6, 0.4], seed=0)
+# #training.show()
+# # Train a naive Bayes model.
+# from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel
+# naiveModel = NaiveBayes.train(training, 1.0)
+#
+# # Make prediction and test accuracy.
+# #predictionAndLabel = test.map(lambda p: (naiveModel.predict(p.features), p.label))
+# #printStatistics(predictionAndLabel, output)
+#
+# predictions2 = naiveModel.predict(test.map(lambda x: x.features))
+# labelsAndPredictions2 = test.map(lambda lp: lp.label).zip(predictions2)
+# # printStatistics(labelsAndPredictions2, test)
+#
