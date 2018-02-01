@@ -123,5 +123,5 @@ naiveModel = NaiveBayes.train(training, 1.0)
 
 predictions2 = naiveModel.predict(test.map(lambda x: x.features))
 labelsAndPredictions2 = test.map(lambda lp: lp.label).zip(predictions2)
-printStatistics(labelsAndPredictions2, test)
+# printStatistics(labelsAndPredictions2, test)
 

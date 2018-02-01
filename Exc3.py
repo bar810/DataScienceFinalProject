@@ -77,7 +77,7 @@ df34['DiscountPrice'] = ((df34['DiscountPrice'] - minPrice) / (maxPrice - minPri
 
 print("-------------------QUEREY 4-------------------")
 df35 = df34.pivot(index='HotelName', columns='datePlusCode', values='DiscountPrice')
-df35.fillna(value=-1, inplace=True)  # TODO replace it to the step before.
+df35.fillna(value=-1, inplace=True)
 
 print(df35)
 

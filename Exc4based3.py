@@ -99,6 +99,7 @@ pivotDf = prePivotNormalizeDf.groupby('HotelName') \
 pivotDf = pivotDf.fillna(-1)
 pivotDf.createOrReplaceTempView('pivotDf')
 pivotDf.show()
+
 # DENDROGRAM
 scaled_df = pivotDf.toPandas()
 scaled_df = scaled_df.set_index('HotelName')

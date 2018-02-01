@@ -105,6 +105,11 @@ fn = matrix.sum(axis=1) - np.diag(matrix)
 print("FN:")
 print(fn)
 print("------------------------------------------------------------")
+most=model.feature_importances_
+print("the most fetcher important: ")
+print(columns_names)
+print(most)
+
 # ROC
 print("ROC:")
 # This is the ROC curve
